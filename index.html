@@ -1,0 +1,3376 @@
+<!DOCTYPE html>
+<html lang="fi"><head><script data-bard-client-injected="true">(function(firebaseConfig, initialAuthToken, appId) {
+        window.__firebase_config = firebaseConfig;
+        window.__initial_auth_token = initialAuthToken;
+        window.__app_id = appId;
+            })("\n{\n  \"apiKey\": \"AIzaSyCqyCcs2R2e7AegGjvFAwG98wlamtbHvZY\",\n  \"authDomain\": \"bard-frontend.firebaseapp.com\",\n  \"projectId\": \"bard-frontend\",\n  \"storageBucket\": \"bard-frontend.firebasestorage.app\",\n  \"messagingSenderId\": \"175205271074\",\n  \"appId\": \"1:175205271074:web:2b7bd4d34d33bf38e6ec7b\"\n}\n","eyJhbGciOiJSUzI1NiIsImtpZCI6IjExNjRiNzdiNDMzZDdhMDAyMWI4NjE4YjhjYTU3ZTMyZGI5MWUxMTMiLCJ0eXAiOiJKV1QifQ.eyJzdWIiOiJmaXJlYmFzZS1hZG1pbnNkay1mYnN2Y0BiYXJkLWZyb250ZW5kLmlhbS5nc2VydmljZWFjY291bnQuY29tIiwiYXVkIjoiaHR0cHM6Ly9pZGVudGl0eXRvb2xraXQuZ29vZ2xlYXBpcy5jb20vZ29vZ2xlLmlkZW50aXR5LmlkZW50aXR5dG9vbGtpdC52MS5JZGVudGl0eVRvb2xraXQiLCJ1aWQiOiIwMTI4NzE0NjYwMzE2NzIwNzg3NCIsImlzcyI6ImZpcmViYXNlLWFkbWluc2RrLWZic3ZjQGJhcmQtZnJvbnRlbmQuaWFtLmdzZXJ2aWNlYWNjb3VudC5jb20iLCJjbGFpbXMiOnsiYXBwSWQiOiJjX2I2MTljMGVjNjc4NmM0MTZfZWxhaW50ZW5fbWFhX2tldHR1Lmh0bWwtNjY0In0sImV4cCI6MTc5NTI2MDY5NywiaWF0IjoxNzk1MjU3MDk3LCJhbGciOiJSUzI1NiJ9.G_qvLBAUMdXjP5C7wocOoc28gUTPWWk6NsnKP_pWgZVR2fYZItOjVJ3aA8MB_UlZv7UlZtoS_A3UREaFVFferPzyyywvinOU-9vkErgPqgHvW1-b7Air93Dn_d84rAHbgNCJd0cJWpm8SC5CK-fliloXtNo04gKN5YSje6R1BEB6mhc4rCE95N92mTjLKnj22Bvk5mN9YMsW3-0cdATu1ft5Ho-vTZ7nKR2c4PKpffgIA0xcpYtXZrZK-fmlDC7GenGWFHg9e1YGA38ZKeM4qr2c_CMrHCSojmSfpdzP2QQMZJMYU635hXvyMP0jsoSE33wRM1simTR_WzLCDcK1hQ","c_b619c0ec6786c416_elainten_maa_kettu.html-664")</script><script data-bard-client-injected="true">
+  document.addEventListener('input', (event) => {
+    if (event.target && (event.target.isContentEditable || event.target.hasAttribute('contenteditable'))) {
+      const clonedDoc = document.cloneNode(true);
+      const injectedScripts = clonedDoc.querySelectorAll('[data-bard-client-injected="true"]');
+      injectedScripts.forEach(el => el.remove());
+      window.parent.postMessage({
+        type: 'inlineEdit',
+        html: '<!DOCTYPE html>\n' + clonedDoc.documentElement.outerHTML
+      }, '*');
+    }
+  });
+</script><script data-bard-client-injected="true">(function(){'use strict';window.addEventListener("message",a=>{a.data&&a.data.type==="SUPPLEMENTAL_DATA_UPDATE"&&window.dispatchEvent(new CustomEvent("supplementaldataupdate",{detail:a.data.data}))});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const SCROLL_KEYS = new Set([
+    'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
+    ' ', 'Spacebar', 'PageUp', 'PageDown', 'Home', 'End',
+  ]);
+  const HORIZONTAL_KEYS = new Set(['ArrowLeft', 'ArrowRight']);
+
+  function isTextEntryTarget(target) {
+    if (!target) return false;
+    const tagName = target.tagName;
+    return tagName === 'INPUT' || tagName === 'TEXTAREA' ||
+        tagName === 'SELECT' || target.isContentEditable === true;
+  }
+
+  // An element absorbs the key only if it both overflows on the axis being
+  // scrolled and is configured to scroll on that axis. The cheap dimension
+  // test runs first because getComputedStyle forces a style recalc, and this
+  // runs on every keypress. Each axis is read from its own longhand: the
+  // 'overflow' shorthand serializes as two values when the axes differ, which
+  // is the common 'overflow-x: hidden; overflow-y: auto' pane.
+  function canScroll(node, horizontal) {
+    const overflows = horizontal ? node.scrollWidth > node.clientWidth
+                                 : node.scrollHeight > node.clientHeight;
+    if (!overflows) return false;
+    const style = window.getComputedStyle(node);
+    const overflow = horizontal ? style.overflowX : style.overflowY;
+    return overflow === 'auto' || overflow === 'scroll';
+  }
+
+  // Walks up from the event target so nested scrollers keep their behavior.
+  // <body> is included because pages that pin the root height make it the
+  // scroll container.
+  function hasScrollableAncestor(target, horizontal) {
+    let node = target;
+    while (node && node !== document.documentElement) {
+      if (canScroll(node, horizontal)) return true;
+      node = node.parentElement;
+    }
+    return false;
+  }
+
+  function rootCanScroll(horizontal) {
+    const scroller = document.scrollingElement || document.documentElement;
+    if (!scroller) return false;
+    // Tolerate a pixel of rounding so subpixel layouts do not look scrollable.
+    return horizontal ? scroller.scrollWidth > window.innerWidth + 1
+                      : scroller.scrollHeight > window.innerHeight + 1;
+  }
+
+  window.addEventListener('keydown', function(event) {
+    if (!SCROLL_KEYS.has(event.key)) return;
+    if (event.defaultPrevented) return;
+    // Alt and Meta turn arrows into browser history navigation, and Ctrl is
+    // reserved for shortcuts, so none of them are scroll intent.
+    if (event.altKey || event.metaKey || event.ctrlKey) return;
+
+    const target = event.target;
+    if (isTextEntryTarget(target)) return;
+
+    // Anything that can still absorb the scroll gets to keep it.
+    const horizontal = HORIZONTAL_KEYS.has(event.key);
+    if (rootCanScroll(horizontal)) return;
+    if (hasScrollableAncestor(target, horizontal)) return;
+
+    event.preventDefault();
+  }, {capture: true, passive: false});
+})();</script><script data-bard-client-injected="true">(function() {
+  // Ensure this script is executed only once
+  if (window.firebaseAuthBridgeScriptLoaded) {
+    return;
+  }
+  window.firebaseAuthBridgeScriptLoaded = true;
+
+  let nextTokenPromiseId = 0;
+
+  // Stores { resolve, reject } for ongoing token requests
+  const pendingTokenPromises = {};
+
+  // Listen for messages from the Host Application
+  window.addEventListener('message', function(event) {
+
+    const messageData = event.data;
+
+  if (messageData && messageData.type === 'RESOLVE_NEW_FIREBASE_TOKEN') {
+      const { success, token, error, promiseId } = messageData ?? {};
+      if (pendingTokenPromises[promiseId]) {
+        if (success) {
+          pendingTokenPromises[promiseId].resolve(token);
+        } else {
+          pendingTokenPromises[promiseId].reject(new Error(error || 'Token refresh failed from host.'));
+        }
+        delete pendingTokenPromises[promiseId];
+      }
+    }
+  });
+
+  // Expose a function for the Generated App to request a new Firebase token
+  window.requestNewFirebaseToken = function() {
+    const currentPromiseId = nextTokenPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingTokenPromises[currentPromiseId] = { resolve, reject };
+    });
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'REQUEST_NEW_FIREBASE_TOKEN',
+        promiseId: currentPromiseId
+      }, '*');
+    } else {
+      pendingTokenPromises[currentPromiseId].reject(new Error('No parent window to request token from.'));
+      delete pendingTokenPromises[currentPromiseId];
+    }
+    return promise;
+  };
+})();</script><script data-bard-client-injected="true">
+let realOriginalGetUserMedia = null;
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  realOriginalGetUserMedia = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices);
+}
+
+(function() {
+  if (navigator.mediaDevices && navigator.mediaDevices.__proto__) {
+    try {
+      Object.defineProperty(navigator.mediaDevices.__proto__, 'getUserMedia', {
+        get: function() {
+          return undefined; // Or throw an error
+        },
+        configurable: false
+      });
+    } catch (error) {
+      console.error("Error defining prototype getter:", error);
+    }
+  }
+})();
+
+(function() {
+  const pendingMediaResolvers = {};
+  let nextMediaPromiseId = 0;
+
+  function requestMediaPermissions(constraints) {
+    const mediaPromiseId = nextMediaPromiseId++;
+    const promise = new Promise((resolve, reject) => {
+      pendingMediaResolvers[mediaPromiseId] = (granted) => {
+        delete pendingMediaResolvers[mediaPromiseId];
+        resolve(granted);
+      };
+    });
+
+    window.parent.postMessage({
+      type: 'requestMediaPermission',
+      constraints: constraints,
+      promiseId: mediaPromiseId,
+    }, '*');
+
+    return promise;
+  }
+
+  let originalGetUserMedia = realOriginalGetUserMedia;
+
+  function interceptGetUserMedia() {
+    if (navigator.mediaDevices) {
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        value: function(constraints) {
+          return requestMediaPermissions(constraints).then((granted) => {
+            if (granted) {
+              if (originalGetUserMedia) {
+                return originalGetUserMedia(constraints);
+              } else {
+                throw new Error("Original getUserMedia not available.");
+              }
+            } else {
+              throw new DOMException('Permission denied', 'NotAllowedError');
+            }
+          });
+        },
+        writable: false,
+        configurable: false
+      });
+    }
+  }
+
+  interceptGetUserMedia();
+
+  const observer = new MutationObserver(function(mutationsList, observer) {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'reconfigured' && mutation.name === 'getUserMedia' && mutation.object === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'getUserMedia' && mutation.target === navigator.mediaDevices) {
+        interceptGetUserMedia();
+      } else if (mutation.type === 'childList' && mutation.addedNodes) {
+        mutation.addedNodes.forEach(node => {
+          if (node === navigator.mediaDevices) {
+            interceptGetUserMedia();
+          }
+        });
+      }
+    }
+  });
+
+  function interceptSpeechRecognition() {
+    if (!window.SpeechRecognition && !window.webkitSpeechRecognition) {
+      return;
+    }
+
+    const OriginalSpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    const SpeechRecognitionWrapper = function(...args) {
+      const recognizer = new OriginalSpeechRecognition(...args);
+      const originalStart = recognizer.start.bind(recognizer);
+
+      recognizer.start = function() {
+        requestMediaPermissions({ audio: true }).then(granted => {
+          if (granted) {
+            originalStart();
+          } else {
+            const errorEvent = new SpeechRecognitionErrorEvent('error');
+            errorEvent.error = 'not-allowed'; // This is the standard error for permission denial.
+            recognizer.dispatchEvent(errorEvent);
+          }
+        });
+      };
+
+      return recognizer;
+    };
+
+    SpeechRecognitionWrapper.prototype = OriginalSpeechRecognition.prototype;
+    SpeechRecognitionWrapper.prototype.constructor = SpeechRecognitionWrapper;
+
+    if (window.SpeechRecognition) {
+      window.SpeechRecognition = SpeechRecognitionWrapper;
+    }
+    if (window.webkitSpeechRecognition) {
+      window.webkitSpeechRecognition = SpeechRecognitionWrapper;
+    }
+  }
+
+  interceptSpeechRecognition();
+
+  window.addEventListener('message', function(event) {
+    if (event.data) {
+      if (event.data.type === 'resolveMediaPermission') {
+        const { promiseId, granted } = event.data;
+        if (pendingMediaResolvers[promiseId]) {
+          pendingMediaResolvers[promiseId](granted);
+        }
+      }
+    }
+  });
+
+})();</script><script ws-interception-config="{&quot;parentOrigin&quot;:&quot;https://gemini.google.com&quot;,&quot;proxiedDomains&quot;:[]}" data-bard-client-injected="true">(function(){'use strict';var u=typeof Object.defineProperties=="function"?Object.defineProperty:function(b,d,e){if(b==Array.prototype||b==Object.prototype)return b;b[d]=e.value;return b};function v(b){b=["object"==typeof globalThis&&globalThis,b,"object"==typeof window&&window,"object"==typeof self&&self,"object"==typeof global&&global];for(var d=0;d<b.length;++d){var e=b[d];if(e&&e.Math==Math)return e}throw Error("Cannot find global object");}var w=v(this);
+function y(b,d){if(d)a:{var e=w;b=b.split(".");for(var h=0;h<b.length-1;h++){var k=b[h];if(!(k in e))break a;e=e[k]}b=b[b.length-1];h=e[b];d=d(h);d!=h&&d!=null&&u(e,b,{configurable:!0,writable:!0,value:d})}}function z(b){function d(h){return b.next(h)}function e(h){return b.throw(h)}return new Promise(function(h,k){function m(n){n.done?h(n.value):Promise.resolve(n.value).then(d,e).then(m,k)}m(b.next())})}y("globalThis",function(b){return b||w});/*
+
+ Copyright The Closure Library Authors.
+ SPDX-License-Identifier: Apache-2.0
+*/
+function A(b,d){function e(){}e.prototype=d.prototype;b.i=d.prototype;b.prototype=new e;b.prototype.constructor=b;b.h=function(h,k,m){for(var n=Array(arguments.length-2),p=2;p<arguments.length;p++)n[p-2]=arguments[p];return d.prototype[k].apply(h,n)}};function B(b,d,e="*"){function h(a){if(typeof a==="string")return F.encode(a).buffer;if(a instanceof ArrayBuffer)return a.slice(0);if(ArrayBuffer.isView(a))return a.buffer.slice(a.byteOffset,a.byteOffset+a.byteLength);throw Error("Invalid data type");}function k(a){a=h(a);var f={type:"send",data:new Uint8Array(a)},g;(g=r)==null||g.postMessage(f,[a])}function m(){if(!r)throw Error("Data port not captured yet.");r.onmessage=a=>{if(a.data.type==="message"){a=new MessageEvent("message",{data:G.decode(a.data.data)});
+let f;(f=c.onmessage)==null||f.call(c,a);c.dispatchEvent(a)}}}function n(){if(!t)throw Error("Control port not captured yet.");t.onmessage=a=>{switch(a.data.type){case "open":l=1;var f=new Event("open"),g;(g=c.onopen)==null||g.call(c,f);c.dispatchEvent(f);q.forEach(H=>{k(H)});q=[];break;case "close":g=a.data;l=3;g=new CloseEvent("close",{code:g.code,reason:g.reason,wasClean:g.wasClean});(f=c.onclose)==null||f.call(c,g);c.dispatchEvent(g);break;case "error":l=3;f=new Event("error");let x;(x=c.onerror)==
+null||x.call(c,f);c.dispatchEvent(f)}}}function p(a){return z(function*(){var f=new MessageChannel;t=f.port1;var g=new MessageChannel;r=g.port1;n();m();window.parent.postMessage({type:"websocket_open",portOrdering:["control","data"],url:b,protocols:a||[],connectionId:I},e,[f.port2,g.port2])}())}var c=Reflect.construct(EventTarget,[],new.target);c.CONNECTING=0;c.OPEN=1;c.CLOSING=2;c.CLOSED=3;c.url=b;c.binaryType="arraybuffer";c.protocol="";c.extensions="";var l=0,t=null,r=null,q=[],F=new TextEncoder,
+G=new TextDecoder;c.onopen=null;c.onmessage=null;c.onclose=null;c.onerror=null;Object.defineProperty(c,"readyState",{get:()=>l,enumerable:!0,configurable:!0});Object.defineProperty(c,"bufferedAmount",{get:()=>{var a=0;q.forEach(f=>{a+=typeof f==="string"?f.length:f.byteLength});return a},enumerable:!0,configurable:!0});var I=function(){var a;return((a=globalThis.crypto)==null?0:a.randomUUID)?globalThis.crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,f=>{var g=Math.random()*
+16|0;return(f==="x"?g:g&3|8).toString(16)})}();c.send=a=>{if(l===1)a instanceof Blob?a.arrayBuffer().then(f=>{k(f)}):k(a);else if(l===0)if(typeof a==="string")q.push(a);else if(a instanceof ArrayBuffer||ArrayBuffer.isView(a))q.push(h(a));else throw Error("Sending Blob is not supported before the connection is open.");else console.debug("WebSocket send called in CLOSING or CLOSED state; ignored.")};c.close=(a=1E3,f="")=>{if(l!==2&&l!==3){l=2;a={type:"close",code:a,reason:f,wasClean:a===1E3};var g;
+(g=t)==null||g.postMessage(a)}};Promise.resolve().then(()=>p(d));return c}A(B,EventTarget);var C=document.currentScript,D=C==null?void 0:C.getAttribute("ws-interception-config");if(!D)throw Error("WebSocket Interceptor: Missing ws-interception-config attribute in the script tag.");var E=JSON.parse(D);if(!E.parentOrigin||typeof E.parentOrigin!=="string")throw Error("WebSocket Interceptor: Invalid parentOrigin in ws-interception-config");
+(function(b){var d=Object.getOwnPropertyDescriptor(window,"WebSocket");if(!d||d.writable||d.configurable)d=Object.assign(function(e,h){try{let k=(new URL(e)).hostname;if(b.proxiedDomains.some(m=>k===m||k.endsWith(`.${m}`)))return new B(e,h,b.parentOrigin)}catch(k){throw window.parent.postMessage({type:"websocket_blocked",url:e,reason:"blocked_invalid_url"},b.parentOrigin),new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");}window.parent.postMessage({type:"websocket_blocked",
+url:e,reason:"blocked_domain_not_allowlisted"},b.parentOrigin);throw new DOMException(`WebSocket connection to '${e}' is not allowed in Canvas.`,"SecurityError");},{CONNECTING:0,OPEN:1,CLOSING:2,CLOSED:3}),Object.defineProperty(window,"WebSocket",{value:d,writable:!1,configurable:!1})})({proxiedDomains:E.proxiedDomains||[],parentOrigin:E.parentOrigin});}).call(this);
+</script><script data-bard-client-injected="true">((function(modelInformation) {
+  const originalFetch = window.fetch;
+  // TODO: b/421908508 - Move these out of the script and match all generative AI model calls.
+  let googleLlmBaseApiUrls = [
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':streamGenerateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.textModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageEditModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.imageTransformModelName + ':generateContent',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predict',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.videoModelName + ':predictLongRunning',
+    'https://generativelanguage.googleapis.com/v1beta/models/' + modelInformation.ttsModelName + ':generateContent',
+  ];
+  modelInformation.deprecatedTextModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+    );
+  });
+  modelInformation.deprecatedImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predict',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':predictLongRunning',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedGenerateImageModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+  modelInformation.deprecatedImageTransformModelNames.forEach((modelName) => {
+    googleLlmBaseApiUrls.push(
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':generateContent',
+      'https://generativelanguage.googleapis.com/v1beta/models/' + modelName + ':streamGenerateContent',
+    );
+  });
+
+  const pendingFetchResolvers = {};
+  let nextPromiseId = 0;
+
+  function handleStringInput(input, optionsArgument) {
+    const actualUrl = input;
+    const fetchCallArgs = [actualUrl, optionsArgument];
+    const effectiveOptions = optionsArgument || {};
+    const bodyForApiKeyCheck = effectiveOptions.body;
+    const bodyForPostMessage = effectiveOptions.body;
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  function handleRequestInput(input, optionsArgument) {
+    const actualUrl = input.url;
+    const fetchCallArgs = [input, optionsArgument];
+    const effectiveOptions = { method: input.method, headers: new Headers(input.headers) };
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (optionsArgument) {
+      if (optionsArgument.method) effectiveOptions.method = optionsArgument.method;
+      if (optionsArgument.headers) effectiveOptions.headers = new Headers(optionsArgument.headers);
+      if ('body' in optionsArgument) {
+        bodyForApiKeyCheck = optionsArgument.body;
+        bodyForPostMessage = optionsArgument.body;
+      } else {
+        bodyForApiKeyCheck = undefined;
+        bodyForPostMessage = input.body;
+      }
+    } else {
+      bodyForApiKeyCheck = undefined;
+      bodyForPostMessage = input.body;
+    }
+    return { actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage };
+  }
+
+  window.fetch = function(input, optionsArgument) {
+    let actualUrl;
+    let fetchCallArgs;
+    let effectiveOptions = {};
+    let bodyForApiKeyCheck;
+    let bodyForPostMessage;
+
+    if (typeof input === 'string') {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleStringInput(input, optionsArgument));
+    } else if (input instanceof Request) {
+      ({actualUrl, fetchCallArgs, effectiveOptions, bodyForApiKeyCheck, bodyForPostMessage} = handleRequestInput(input, optionsArgument));
+    } else {
+      return originalFetch.apply(window, [input, optionsArgument]);
+    }
+
+    effectiveOptions.method = effectiveOptions.method || 'GET';
+    if (!effectiveOptions.headers) {
+      effectiveOptions.headers = new Headers();
+    }
+
+
+    if (typeof actualUrl === 'string' && googleLlmBaseApiUrls.some((url) => actualUrl.startsWith(url))) {
+      let apiKeyIsNull = true;
+
+      const regex = new RegExp("models/([^:]+)");
+      const modelNameMatch = actualUrl.match(regex);
+      const modelName = modelNameMatch ? modelNameMatch[1] : 'unspecified';
+
+
+      try {
+        const urlObject = new URL(actualUrl);  // Use URL object for robust parsing
+        const apiKeyParam = urlObject.searchParams.get('key');
+        if (apiKeyParam) {
+          apiKeyIsNull = false;
+        }
+      } catch (e) {
+        // Continue checks even if URL parsing fails
+      }
+
+      if (apiKeyIsNull && effectiveOptions.headers) {
+        const h = new Headers(effectiveOptions.headers);
+        const apiKeyHeaderValue = h.get('X-API-Key') || h.get('x-api-key');
+        if (apiKeyHeaderValue) {
+          apiKeyIsNull = false;
+          return originalFetch.apply(window, fetchCallArgs);
+        }
+      }
+
+      if (apiKeyIsNull && effectiveOptions.method && ['POST', 'PUT', 'PATCH'].includes(effectiveOptions.method.toUpperCase()) && typeof bodyForApiKeyCheck === 'string') {
+        try {
+          const bodyData = JSON.parse(bodyForApiKeyCheck);
+          if (bodyData && bodyData.apiKey) {
+            apiKeyIsNull = false;
+            return originalFetch.apply(window, fetchCallArgs);
+          }
+        } catch (e) {
+          // Ignore JSON parsing errors
+        }
+      }
+
+      if(apiKeyIsNull) {
+        const promiseId = nextPromiseId++;
+        const promise = new Promise((resolve) => {
+          pendingFetchResolvers[promiseId] = (resolvedResponse) => {
+            delete pendingFetchResolvers[promiseId];
+            resolve(resolvedResponse);
+          };
+        });
+
+        let serializedBodyForPostMessage;
+        if (typeof bodyForPostMessage === 'string' || bodyForPostMessage == null) {
+            serializedBodyForPostMessage = bodyForPostMessage;
+        } else if (bodyForPostMessage instanceof ReadableStream) {
+            serializedBodyForPostMessage = null;
+        } else {
+            try {
+                serializedBodyForPostMessage = JSON.stringify(bodyForPostMessage);
+            } catch (e) {
+                serializedBodyForPostMessage = null;
+            }
+        }
+
+        const messageOptions = {
+            method: effectiveOptions.method,
+            headers: Object.fromEntries(new Headers(effectiveOptions.headers).entries()),
+            body: serializedBodyForPostMessage
+        };
+
+        window.parent.postMessage({
+          type: 'requestFetch',
+          url: actualUrl,
+          modelName: modelName,
+          options: messageOptions,
+          promiseId: promiseId,
+        }, '*');
+
+        return promise;
+      }
+      return originalFetch.apply(window, fetchCallArgs);
+    }
+    return originalFetch.apply(window, fetchCallArgs);
+  };
+
+  window.addEventListener('message', function(event) {
+    if (event.data && event.data.type === 'resolveFetch') {
+      const { promiseId, response } = event.data;
+      if (pendingFetchResolvers[promiseId]) {
+        try {
+          const reconstructedResponse = new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: new Headers(response.headers),
+          });
+          pendingFetchResolvers[promiseId](reconstructedResponse);
+        } catch (error) {
+          pendingFetchResolvers[promiseId](new Response(null, { status: 500, statusText: "Interceptor Response Reconstruction Error" }));
+        }
+      }
+    }
+  });
+
+}))({"textModelName":"gemini-3-flash-preview","imageModelName":"imagen-4.0-generate-001","imageEditModelName":"gemini-3.1-flash-image","imageTransformModelName":"gemini-3-pro-image","videoModelName":"veo-2.0-generate-001","ttsModelName":"gemini-2.5-flash-preview-tts","deprecatedTextModelNames":["gemini-2.0-flash","gemini-2.5-flash","gemini-2.5-flash-preview-04-17","gemini-2.5-flash-preview-05-20","gemini-2.5-flash-preview-09-2025"],"deprecatedImageModelNames":["imagen-3.0-generate-001","imagen-3.0-generate-002"],"deprecatedGenerateImageModelNames":["gemini-2.5-flash-image-preview","gemini-2.5-flash-image","gemini-3.1-flash-image-preview"],"deprecatedImageTransformModelNames":["gemini-3-pro-image-preview-11-2025"]})</script><script data-bard-client-injected="true">(function() {
+  const OVERLAY_SELECTOR =
+    'dialog[open], [role="dialog"], [role="alertdialog"], [role="menu"], [role="listbox"], [role="combobox"]';
+
+  function isVisibleOverlay(element) {
+    if (element.closest('[hidden], [aria-hidden="true"], [inert]')) {
+      return false;
+    }
+    if (window.getComputedStyle(element).visibility === 'hidden') {
+      return false;
+    }
+    for (let cur = element; cur; cur = cur.parentElement) {
+      if (window.getComputedStyle(cur).display === 'none') {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function hasOpenOverlay() {
+    const candidates = document.querySelectorAll(OVERLAY_SELECTOR);
+    for (let i = 0; i < candidates.length; i++) {
+      if (isVisibleOverlay(candidates[i])) {
+        return true;
+      }
+    }
+    try {
+      if (document.querySelector('[popover]:popover-open')) {
+        return true;
+      }
+    } catch (e) {
+      // Ignore engines that do not support :popover-open.
+    }
+    return false;
+  }
+
+  function isNonEmptySearchInput(target) {
+    return (
+      Boolean(target) &&
+      target.tagName === 'INPUT' &&
+      typeof target.type === 'string' &&
+      target.type.toLowerCase() === 'search' &&
+      typeof target.value === 'string' &&
+      target.value.length > 0
+    );
+  }
+
+  function shouldIgnoreEscape(event) {
+    return (
+      event.key !== 'Escape' ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.shiftKey ||
+      event.isComposing ||
+      event.repeat ||
+      event.keyCode === 229 ||
+      isNonEmptySearchInput(event.target)
+    );
+  }
+
+  let shouldIgnoreCaptureState = false;
+
+  window.addEventListener(
+    'keydown',
+    function(event) {
+      if (event.key === 'Escape') {
+        shouldIgnoreCaptureState =
+          hasOpenOverlay() || isNonEmptySearchInput(event.target);
+      }
+    },
+    {capture: true},
+  );
+
+  window.addEventListener('keydown', function(event) {
+    if (
+      shouldIgnoreEscape(event) ||
+      event.defaultPrevented ||
+      shouldIgnoreCaptureState
+    ) {
+      return;
+    }
+    const wasBlockedOnCapture = shouldIgnoreCaptureState;
+    queueMicrotask(function() {
+      if (event.defaultPrevented || wasBlockedOnCapture) {
+        return;
+      }
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({'type': 'escapeKey'}, '*');
+      }
+    });
+  });
+})();</script><script data-bard-client-injected="true">(function() {
+  function normalizeSlug(str) {
+    try {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^p{L}p{N}s_-]/gu, '')
+        .replace(/s+/g, '-');
+    } catch (e) {
+      return str
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9s_-]/g, '')
+        .replace(/s+/g, '-');
+    }
+  }
+
+  function findTargetElement(hash) {
+    if (!hash || hash === '#') {
+      return null;
+    }
+    const rawId = hash.startsWith('#') ? hash.slice(1) : hash;
+    let decodedId = rawId;
+    try {
+      decodedId = decodeURIComponent(rawId);
+    } catch (e) {
+      // Ignore URI malformed errors.
+    }
+
+    // 1. Direct ID match (raw and decoded).
+    let target = document.getElementById(rawId) || document.getElementById(decodedId);
+    if (target) {
+      return target;
+    }
+
+    // 2. Name attribute match (<a name="...">).
+    try {
+      if (typeof CSS !== 'undefined' && CSS.escape) {
+        target =
+          document.querySelector('[name="' + CSS.escape(rawId) + '"]') ||
+          document.querySelector('[name="' + CSS.escape(decodedId) + '"]');
+      } else {
+        const namedElements = document.getElementsByName(rawId);
+        if (namedElements && namedElements.length > 0) {
+          return namedElements[0];
+        }
+      }
+    } catch (e) {
+      // Ignore querySelector syntax errors.
+    }
+    if (target) {
+      return target;
+    }
+
+    // 3. Match heading text by slug (for Markdown TOCs where headings lack explicit IDs).
+    const targetSlug = normalizeSlug(decodedId);
+    if (targetSlug) {
+      for (const heading of document.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
+        if (normalizeSlug(heading.textContent || '') === targetSlug) {
+          return heading;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  document.addEventListener('click', function(event) {
+    const target = event.target;
+    const anchor = target && typeof target.closest === 'function' ? target.closest('a') : null;
+    if (!anchor) {
+      return;
+    }
+
+    const href = anchor.getAttribute('href');
+    if (
+      !href ||
+      href.trim().toLowerCase().startsWith('javascript:') ||
+      anchor.hasAttribute('download')
+    ) {
+      return;
+    }
+
+    // Check if the link is an in-page hash / anchor link.
+    if (href.startsWith('#')) {
+      event.preventDefault();
+      const targetElement = findTargetElement(href);
+      if (targetElement) {
+        targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+      }
+      return;
+    }
+
+    // Check if the URL has the same origin/pathname but with a hash.
+    try {
+      const url = new URL(anchor.href, window.location.href);
+      if (
+        url.hash &&
+        url.origin === window.location.origin &&
+        url.pathname === window.location.pathname
+      ) {
+        event.preventDefault();
+        const targetElement = findTargetElement(url.hash);
+        if (targetElement) {
+          targetElement.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+        return;
+      }
+    } catch (e) {
+      // Fall through if URL parsing fails.
+    }
+
+    // For all external or full navigation links, prevent iframe-level navigation
+    // (which breaks in AGSA WebView or sandboxed iframes) and ensure they open
+    // safely in a new tab/window.
+    if (anchor.target !== '_blank') {
+      event.preventDefault();
+      window.open(anchor.href, '_blank', 'noopener,noreferrer');
+    }
+  }, {capture: true});
+})();</script><script data-bard-client-injected="true">(function(){'use strict';function a(){window.parent.postMessage({type:"interaction"},"*")}window.addEventListener("click",a,{capture:!0,passive:!0});window.addEventListener("touchstart",a,{capture:!0,passive:!0});window.addEventListener("keydown",a,{capture:!0,passive:!0});}).call(this);
+</script><script data-bard-client-injected="true">(function() {
+  const originalConsoleLog = console.log;
+  const originalConsoleError = console.error;
+
+    /**
+   * Normalizes an error event or a promise rejection reason into a structured error object.
+   * @param {*} errorEventOrReason The error object or reason.
+   * @return {object} Structured error data { message, name, stack }.
+   */
+  function getErrorObject(errorEventOrReason) {
+    if (errorEventOrReason instanceof Error) {
+      return {
+        message: errorEventOrReason.message,
+        name: errorEventOrReason.name,
+        stack: errorEventOrReason.stack,
+      };
+    }
+    // Fallback for non-Error objects.
+    try {
+      return {
+        message: JSON.stringify(errorEventOrReason),
+        name: 'UnknownErrorType',
+        stack: null,
+      };
+    } catch (e) {
+      return {
+        message: String(errorEventOrReason),
+        name: 'UnknownErrorTypeNonStringifiable',
+        stack: null,
+      };
+    }
+  }
+
+  /**
+   * Converts an array of arguments (from log/error) into a single string.
+   * Handles Error objects specially to include their message and stack.
+   * @param {Array<*>} args - Arguments passed to console methods.
+   * @return {string} A string representation of the arguments.
+   */
+  function stringifyArgs(args) {
+    return args
+      .map((arg) => {
+        if (arg instanceof Error) {
+          const {message, stack} = arg;
+          return `Error: ${message}${stack ? ('\nStack: ' + stack) : ''}`;
+        }
+        if (typeof arg === 'object' && arg !== null) {
+          try {
+            return JSON.stringify(arg);
+          } catch (error) {
+            return '[Circular Object]';
+          }
+        } else {
+          return String(arg);
+        }
+      })
+      .join(' ');
+  }
+
+  console.log = function(...args) {
+    const logString = stringifyArgs(args);
+    window.parent.postMessage({ type: 'log', message: logString }, '*');
+    originalConsoleLog.apply(console, args);
+  };
+
+  console.error = function(...args) {
+    let errorData;
+    if (args.length > 0 && args[0] instanceof Error) {
+      const err = args[0];
+      // If the first arg is an Error, capture its details.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        ...getErrorObject(err),
+        rawArgsString: stringifyArgs(args.slice(1)),
+        timestamp: new Date().toISOString(),
+      };
+    } else {
+      // If not an Error object, treat all args as a general error message.
+      errorData = {
+        type: 'error',
+        source: 'CONSOLE_ERROR',
+        message: stringifyArgs(args),
+        name: 'ConsoleLoggedError',
+        stack: null,
+        timestamp: new Date().toISOString(),
+      };
+    }
+    window.parent.postMessage(errorData, '*');
+    originalConsoleError.apply(console, args);
+  };
+
+  // Listen for global unhandled synchronous errors.
+  window.addEventListener('error', function(event) {
+    const errorDetails = event.error ? getErrorObject(event.error) : {
+      message: event.message,
+      name: 'GlobalError',
+      stack: null,
+      filename: event.filename,
+      lineno: event.lineno,
+      colno: event.colno,
+    };
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'global',
+      ...errorDetails,
+      message: errorDetails.message || event.message,
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+  // Listen for unhandled promise rejections (asynchronous errors).
+  window.addEventListener('unhandledrejection', function(event) {
+    const errorDetails = getErrorObject(event.reason);
+
+    window.parent.postMessage({
+      type: 'error',
+      source: 'unhandledrejection',
+      ...errorDetails,
+      message: errorDetails.message || 'Unhandled Promise Rejection',
+      timestamp: new Date().toISOString(),
+    }, '*');
+  });
+
+})();</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Eläinten Maa — Hyperkauniit Animaatiot &amp; Ketun Bunkkeri</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&amp;family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      margin: 0; padding: 0; width: 100%; height: 100%;
+      overflow: hidden; background: #030712; color: #f8fafc;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      user-select: none;
+    }
+    .font-display { font-family: 'Cinzel', Georgia, serif; }
+    #sceneCanvas {
+      position: fixed; inset: 0; width: 100%; height: 100%;
+      display: block; z-index: 1;
+    }
+    .glass {
+      background: rgba(8, 15, 32, 0.78);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      box-shadow: 0 12px 34px rgba(0, 0, 0, 0.48);
+    }
+    .hidden-overlay { opacity: 0 !important; pointer-events: none !important; visibility: hidden !important; }
+    .visible-overlay { opacity: 1; pointer-events: auto; visibility: visible; }
+    .transition-overlay { transition: opacity 0.28s ease, visibility 0.28s ease; }
+
+    /* Yläpalkin ja erikoisnappien hehkuanimaatiot */
+    @keyframes pulseSoft {
+      0%, 100% { filter: brightness(1); transform: translateY(0); }
+      50% { filter: brightness(1.12); transform: translateY(-1px); }
+    }
+    @keyframes bunkerPulse {
+      0%, 100% { box-shadow: 0 0 14px rgba(52, 211, 153, .45), 0 0 26px rgba(251, 191, 36, .22); }
+      50% { box-shadow: 0 0 24px rgba(110, 231, 183, .85), 0 0 40px rgba(253, 224, 71, .45); }
+    }
+    @keyframes nukePulse {
+      0%, 100% { box-shadow: 0 0 14px rgba(239, 68, 68, .55), 0 0 28px rgba(249, 115, 22, .3); }
+      50% { box-shadow: 0 0 26px rgba(251, 146, 60, .9), 0 0 42px rgba(239, 68, 68, .55); }
+    }
+    @keyframes portalPulse {
+      0%, 100% { box-shadow: 0 0 14px rgba(168, 85, 247, .55), 0 0 28px rgba(56, 189, 248, .3); }
+      50% { box-shadow: 0 0 26px rgba(192, 132, 252, .9), 0 0 44px rgba(34, 211, 238, .6); }
+    }
+    @keyframes dlcPulse {
+      0%, 100% { box-shadow: 0 0 16px rgba(244, 63, 94, .65), 0 0 32px rgba(251, 191, 36, .4); }
+      50% { box-shadow: 0 0 30px rgba(251, 113, 133, .95), 0 0 50px rgba(253, 224, 71, .7); }
+    }
+    @keyframes paraPulse {
+      0%, 100% { box-shadow: 0 0 15px rgba(14, 165, 233, .6), 0 0 30px rgba(250, 204, 21, .35); }
+      50% { box-shadow: 0 0 28px rgba(56, 189, 248, .95), 0 0 46px rgba(253, 224, 71, .65); }
+    }
+    @keyframes ultraChaosPulse {
+      0%, 100% { box-shadow: 0 0 22px rgba(239, 68, 68, .75), 0 0 44px rgba(168, 85, 247, .45); }
+      50% { box-shadow: 0 0 36px rgba(251, 191, 36, .95), 0 0 64px rgba(239, 68, 68, .78); }
+    }
+    @keyframes bikeChaosPulse {
+      0%, 100% { box-shadow: 0 0 22px rgba(16, 185, 129, .75), 0 0 44px rgba(236, 72, 153, .45); }
+      50% { box-shadow: 0 0 36px rgba(253, 224, 71, .95), 0 0 64px rgba(56, 189, 248, .75); }
+    }
+    @keyframes tsarCarPulse {
+      0%, 100% { box-shadow: 0 0 24px rgba(239, 68, 68, .85), 0 0 48px rgba(250, 204, 21, .5); }
+      50% { box-shadow: 0 0 40px rgba(254, 240, 138, .98), 0 0 70px rgba(239, 68, 68, .88); }
+    }
+
+    .bunker-btn { background: linear-gradient(135deg, #064e3b 0%, #0f766e 50%, #b45309 100%); border: 1px solid rgba(110, 231, 183, .8); animation: bunkerPulse 2.4s ease-in-out infinite; }
+    .lab-btn { background: linear-gradient(135deg, #b45309 0%, #d97706 50%, #eab308 100%); border: 1px solid rgba(254, 240, 138, .8); box-shadow: 0 0 16px rgba(245, 158, 11, .45); }
+    .nuke-btn { background: linear-gradient(135deg, #991b1b 0%, #dc2626 50%, #ea580c 100%); border: 1px solid rgba(254, 215, 170, .85); animation: nukePulse 2.1s ease-in-out infinite; }
+    .sso-btn { background: linear-gradient(135deg, #1d4ed8 0%, #6d28d9 52%, #a855f7 100%); border: 1px solid rgba(196, 181, 253, .85); box-shadow: 0 0 18px rgba(139, 92, 246, .55); }
+    .portal-btn { background: linear-gradient(135deg, #6b21a8 0%, #9333ea 48%, #0284c7 100%); border: 1px solid rgba(165, 243, 252, .85); animation: portalPulse 2.2s ease-in-out infinite; }
+    .dlc-btn { background: linear-gradient(135deg, #be123c 0%, #ea580c 50%, #eab308 100%); border: 1.5px solid rgba(254, 240, 138, .95); animation: dlcPulse 1.9s ease-in-out infinite; }
+    .para-btn { background: linear-gradient(135deg, #0369a1 0%, #0d9488 50%, #d97706 100%); border: 1.5px solid rgba(186, 230, 253, .92); animation: paraPulse 2.0s ease-in-out infinite; }
+    .mega-jet-btn { background: linear-gradient(135deg, #7c3aed 0%, #db2777 50%, #f59e0b 100%); border: 1.5px solid rgba(254, 240, 138, .92); box-shadow: 0 0 24px rgba(219, 39, 119, .55); }
+    .ultra-chaos-btn { background: linear-gradient(135deg, #7f1d1d 0%, #dc2626 32%, #9333ea 68%, #f59e0b 100%); border: 1.5px solid rgba(254, 240, 138, .98); animation: ultraChaosPulse 1.8s ease-in-out infinite; }
+    .bike-chaos-btn { background: linear-gradient(135deg, #047857 0%, #0284c7 34%, #db2777 68%, #eab308 100%); border: 1.5px solid rgba(254, 249, 195, .98); animation: bikeChaosPulse 1.7s ease-in-out infinite; }
+    .tsar-car-btn { background: linear-gradient(135deg, #7f1d1d 0%, #b91c1c 28%, #ea580c 58%, #eab308 100%); border: 1.5px solid rgba(254, 249, 195, .98); animation: tsarCarPulse 1.6s ease-in-out infinite; }
+    .blackhole-btn { background: linear-gradient(135deg, #3b0764 0%, #7e22ce 45%, #d97706 100%); border: 1px solid rgba(253, 224, 71, .8); box-shadow: 0 0 22px rgba(168, 85, 247, .65); }
+
+    .btn-anim { transition: transform 0.16s ease, filter 0.16s ease; }
+    .btn-anim:hover { filter: brightness(1.16); transform: scale(1.04); }
+    .btn-anim:active { transform: scale(0.96); }
+  </style>
+<style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.pointer-events-none{pointer-events:none}.pointer-events-auto{pointer-events:auto}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.inset-0{inset:0px}.bottom-3{bottom:0.75rem}.bottom-5{bottom:1.25rem}.bottom-6{bottom:1.5rem}.left-0{left:0px}.left-1\/2{left:50%}.left-3{left:0.75rem}.right-0{right:0px}.right-3{right:0.75rem}.right-6{right:1.5rem}.top-0{top:0px}.top-20{top:5rem}.z-20{z-index:20}.z-30{z-index:30}.z-40{z-index:40}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.my-2{margin-top:0.5rem;margin-bottom:0.5rem}.mb-4{margin-bottom:1rem}.mt-0\.5{margin-top:0.125rem}.mt-1{margin-top:0.25rem}.mt-1\.5{margin-top:0.375rem}.mt-14{margin-top:3.5rem}.mt-2{margin-top:0.5rem}.mt-2\.5{margin-top:0.625rem}.mt-28{margin-top:7rem}.mt-3{margin-top:0.75rem}.mt-4{margin-top:1rem}.block{display:block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}.h-2{height:0.5rem}.h-9{height:2.25rem}.h-full{height:100%}.max-h-\[90vh\]{max-height:90vh}.w-2{width:0.5rem}.w-9{width:2.25rem}.w-\[92\%\]{width:92%}.w-full{width:100%}.max-w-2xl{max-width:42rem}.max-w-lg{max-width:32rem}.max-w-md{max-width:28rem}.max-w-xl{max-width:36rem}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}.-translate-x-1\/2{--tw-translate-x:-50%;transform:translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@keyframes pulse{50%{opacity:.5}}.animate-pulse{animation:pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite}.cursor-grab{cursor:grab}.cursor-pointer{cursor:pointer}.grid-cols-1{grid-template-columns:repeat(1, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-2\.5{gap:0.625rem}.gap-3{gap:0.75rem}.gap-3\.5{gap:0.875rem}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-full{border-radius:9999px}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.border-amber-300\/40{border-color:rgb(252 211 77 / 0.4)}.border-amber-300\/45{border-color:rgb(252 211 77 / 0.45)}.border-amber-300\/55{border-color:rgb(252 211 77 / 0.55)}.border-amber-300\/60{border-color:rgb(252 211 77 / 0.6)}.border-amber-300\/80{border-color:rgb(252 211 77 / 0.8)}.border-amber-300\/85{border-color:rgb(252 211 77 / 0.85)}.border-amber-400\/45{border-color:rgb(251 191 36 / 0.45)}.border-emerald-200\/70{border-color:rgb(167 243 208 / 0.7)}.border-emerald-400\/40{border-color:rgb(52 211 153 / 0.4)}.border-emerald-400\/45{border-color:rgb(52 211 153 / 0.45)}.border-emerald-400\/50{border-color:rgb(52 211 153 / 0.5)}.border-emerald-400\/60{border-color:rgb(52 211 153 / 0.6)}.border-fuchsia-300\/80{border-color:rgb(240 171 252 / 0.8)}.border-indigo-300\/80{border-color:rgb(165 180 252 / 0.8)}.border-orange-400\/45{border-color:rgb(251 146 60 / 0.45)}.border-pink-200\/70{border-color:rgb(251 207 232 / 0.7)}.border-purple-300\/80{border-color:rgb(216 180 254 / 0.8)}.border-purple-400\/45{border-color:rgb(192 132 252 / 0.45)}.border-purple-400\/50{border-color:rgb(192 132 252 / 0.5)}.border-red-300\/70{border-color:rgb(252 165 165 / 0.7)}.border-sky-300\/45{border-color:rgb(125 211 252 / 0.45)}.border-sky-300\/80{border-color:rgb(125 211 252 / 0.8)}.border-slate-500\/35{border-color:rgb(100 116 139 / 0.35)}.border-yellow-100\/80{border-color:rgb(254 249 195 / 0.8)}.border-yellow-300\/90{border-color:rgb(253 224 71 / 0.9)}.border-yellow-300\/95{border-color:rgb(253 224 71 / 0.95)}.bg-amber-400{--tw-bg-opacity:1;background-color:rgb(251 191 36 / var(--tw-bg-opacity, 1))}.bg-amber-500\/15{background-color:rgb(245 158 11 / 0.15)}.bg-amber-500\/25{background-color:rgb(245 158 11 / 0.25)}.bg-black{--tw-bg-opacity:1;background-color:rgb(0 0 0 / var(--tw-bg-opacity, 1))}.bg-emerald-600\/30{background-color:rgb(5 150 105 / 0.3)}.bg-fuchsia-500\/25{background-color:rgb(217 70 239 / 0.25)}.bg-indigo-500\/25{background-color:rgb(99 102 241 / 0.25)}.bg-pink-500\/25{background-color:rgb(236 72 153 / 0.25)}.bg-purple-500\/25{background-color:rgb(168 85 247 / 0.25)}.bg-red-600\/30{background-color:rgb(220 38 38 / 0.3)}.bg-red-700\/40{background-color:rgb(185 28 28 / 0.4)}.bg-rose-500\/25{background-color:rgb(244 63 94 / 0.25)}.bg-sky-500\/25{background-color:rgb(14 165 233 / 0.25)}.bg-slate-800\/90{background-color:rgb(30 41 59 / 0.9)}.bg-slate-950\/75{background-color:rgb(2 6 23 / 0.75)}.bg-gradient-to-r{background-image:linear-gradient(to right, var(--tw-gradient-stops))}.from-amber-500{--tw-gradient-from:#f59e0b var(--tw-gradient-from-position);--tw-gradient-to:rgb(245 158 11 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-emerald-600{--tw-gradient-from:#059669 var(--tw-gradient-from-position);--tw-gradient-to:rgb(5 150 105 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-pink-600{--tw-gradient-from:#db2777 var(--tw-gradient-from-position);--tw-gradient-to:rgb(219 39 119 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.from-red-700{--tw-gradient-from:#b91c1c var(--tw-gradient-from-position);--tw-gradient-to:rgb(185 28 28 / 0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from), var(--tw-gradient-to)}.to-orange-600{--tw-gradient-to:#ea580c var(--tw-gradient-to-position)}.to-purple-600{--tw-gradient-to:#9333ea var(--tw-gradient-to-position)}.to-teal-500{--tw-gradient-to:#14b8a6 var(--tw-gradient-to-position)}.to-yellow-500{--tw-gradient-to:#eab308 var(--tw-gradient-to-position)}.object-cover{object-fit:cover}.p-2\.5{padding:0.625rem}.p-3{padding:0.75rem}.p-3\.5{padding:0.875rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.px-1\.5{padding-left:0.375rem;padding-right:0.375rem}.px-2\.5{padding-left:0.625rem;padding-right:0.625rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-3\.5{padding-left:0.875rem;padding-right:0.875rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-1\.5{padding-top:0.375rem;padding-bottom:0.375rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-2\.5{padding-top:0.625rem;padding-bottom:0.625rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-3\.5{padding-top:0.875rem;padding-bottom:0.875rem}.pb-1{padding-bottom:0.25rem}.text-left{text-align:left}.text-center{text-align:center}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-medium{font-weight:500}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-relaxed{line-height:1.625}.leading-tight{line-height:1.25}.tracking-wide{letter-spacing:0.025em}.tracking-widest{letter-spacing:0.1em}.text-amber-100{--tw-text-opacity:1;color:rgb(254 243 199 / var(--tw-text-opacity, 1))}.text-amber-100\/95{color:rgb(254 243 199 / 0.95)}.text-amber-200{--tw-text-opacity:1;color:rgb(253 230 138 / var(--tw-text-opacity, 1))}.text-amber-300{--tw-text-opacity:1;color:rgb(252 211 77 / var(--tw-text-opacity, 1))}.text-emerald-100\/95{color:rgb(209 250 229 / 0.95)}.text-emerald-200{--tw-text-opacity:1;color:rgb(167 243 208 / var(--tw-text-opacity, 1))}.text-emerald-300{--tw-text-opacity:1;color:rgb(110 231 183 / var(--tw-text-opacity, 1))}.text-fuchsia-200{--tw-text-opacity:1;color:rgb(245 208 254 / var(--tw-text-opacity, 1))}.text-indigo-200{--tw-text-opacity:1;color:rgb(199 210 254 / var(--tw-text-opacity, 1))}.text-orange-200{--tw-text-opacity:1;color:rgb(254 215 170 / var(--tw-text-opacity, 1))}.text-pink-100\/95{color:rgb(252 231 243 / 0.95)}.text-purple-200{--tw-text-opacity:1;color:rgb(233 213 255 / var(--tw-text-opacity, 1))}.text-purple-300{--tw-text-opacity:1;color:rgb(216 180 254 / var(--tw-text-opacity, 1))}.text-rose-100\/95{color:rgb(255 228 230 / 0.95)}.text-sky-100\/90{color:rgb(224 242 254 / 0.9)}.text-sky-200{--tw-text-opacity:1;color:rgb(186 230 253 / var(--tw-text-opacity, 1))}.text-sky-300{--tw-text-opacity:1;color:rgb(125 211 252 / var(--tw-text-opacity, 1))}.text-slate-100{--tw-text-opacity:1;color:rgb(241 245 249 / var(--tw-text-opacity, 1))}.text-slate-200{--tw-text-opacity:1;color:rgb(226 232 240 / var(--tw-text-opacity, 1))}.text-slate-200\/90{color:rgb(226 232 240 / 0.9)}.text-slate-200\/95{color:rgb(226 232 240 / 0.95)}.text-slate-300{--tw-text-opacity:1;color:rgb(203 213 225 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-slate-950{--tw-text-opacity:1;color:rgb(2 6 23 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.text-yellow-100{--tw-text-opacity:1;color:rgb(254 249 195 / var(--tw-text-opacity, 1))}.text-yellow-200{--tw-text-opacity:1;color:rgb(254 240 138 / var(--tw-text-opacity, 1))}.opacity-0{opacity:0}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgb(0 0 0 / 0.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_30px_rgba\(251\2c 191\2c 36\2c 0\.22\)\]{--tw-shadow:0 0 30px rgba(251,191,36,0.22);--tw-shadow-colored:0 0 30px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_32px_rgba\(251\2c 191\2c 36\2c 0\.22\)\]{--tw-shadow:0 0 32px rgba(251,191,36,0.22);--tw-shadow-colored:0 0 32px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_35px_rgba\(251\2c 191\2c 36\2c 0\.22\)\]{--tw-shadow:0 0 35px rgba(251,191,36,0.22);--tw-shadow-colored:0 0 35px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_45px_rgba\(16\2c 185\2c 129\2c \.22\)\]{--tw-shadow:0 0 45px rgba(16,185,129,.22);--tw-shadow-colored:0 0 45px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.shadow-\[0_0_45px_rgba\(56\2c 189\2c 248\2c 0\.22\)\]{--tw-shadow:0 0 45px rgba(56,189,248,0.22);--tw-shadow-colored:0 0 45px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow)}.drop-shadow{--tw-drop-shadow:drop-shadow(0 1px 2px rgb(0 0 0 / 0.1)) drop-shadow(0 1px 1px rgb(0 0 0 / 0.06));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.drop-shadow-\[0_4px_24px_rgba\(0\2c 0\2c 0\2c 0\.8\)\]{--tw-drop-shadow:drop-shadow(0 4px 24px rgba(0,0,0,0.8));filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.backdrop-blur-md{--tw-backdrop-blur:blur(12px);-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.transition-opacity{transition-property:opacity;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.duration-200{transition-duration:200ms}.duration-300{transition-duration:300ms}.hover\:bg-slate-700:hover{--tw-bg-opacity:1;background-color:rgb(51 65 85 / var(--tw-bg-opacity, 1))}.hover\:text-white:hover{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.active\:cursor-grabbing:active{cursor:grabbing}@media (min-width: 640px){.sm\:bottom-4{bottom:1rem}.sm\:left-auto{left:auto}.sm\:right-4{right:1rem}.sm\:mt-20{margin-top:5rem}.sm\:mt-4{margin-top:1rem}.sm\:w-80{width:20rem}.sm\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.sm\:flex-row{flex-direction:row}.sm\:items-start{align-items:flex-start}.sm\:items-center{align-items:center}.sm\:p-4{padding:1rem}.sm\:p-5{padding:1.25rem}.sm\:p-6{padding:1.5rem}.sm\:p-7{padding:1.75rem}.sm\:px-3{padding-left:0.75rem;padding-right:0.75rem}.sm\:py-2{padding-top:0.5rem;padding-bottom:0.5rem}.sm\:text-2xl{font-size:1.5rem;line-height:2rem}.sm\:text-5xl{font-size:3rem;line-height:1}.sm\:text-base{font-size:1rem;line-height:1.5rem}.sm\:text-lg{font-size:1.125rem;line-height:1.75rem}.sm\:text-sm{font-size:0.875rem;line-height:1.25rem}.sm\:text-xs{font-size:0.75rem;line-height:1rem}}</style></head>
+<body>
+  <!-- Pääpiirtokanvas kaikille animaatioille -->
+  <canvas id="sceneCanvas" width="948" height="828" style="cursor: default;"></canvas>
+
+  <!-- Kuun ydinaseen vihjekyltti -->
+  <div id="moonTooltip" class="fixed z-30 pointer-events-none px-3 py-1.5 rounded-xl glass border border-amber-300/60 text-amber-100 text-xs font-bold tracking-wide transition-opacity duration-200 opacity-0" style="left: 738px; top: 119px; opacity: 0;">
+    ☢️ Klikkaa kuun ydinasesiiloa!
+  </div>
+
+  <!-- Yläpalkki: Äänet, saavutusmerkit ja pikanapit -->
+  <div class="fixed top-0 left-0 right-0 z-40 pointer-events-none p-2.5 sm:p-4 flex flex-col sm:flex-row sm:items-start justify-between gap-2">
+    <div class="flex flex-wrap items-center gap-1.5 pointer-events-auto">
+      <button id="soundBtn" type="button" class="glass btn-anim px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-100 flex items-center gap-1.5 cursor-pointer">
+        <span id="soundIcon">🔊</span><span id="soundText">Äänet päällä</span>
+      </button>
+      <div id="badgeKey" class="hidden px-2.5 py-1 rounded-full bg-amber-500/25 border border-amber-300/80 text-amber-200 text-[11px] font-semibold">🔑 Labra</div>
+      <div id="badgeWay2" class="hidden px-2.5 py-1 rounded-full bg-purple-500/25 border border-purple-300/80 text-purple-200 text-[11px] font-semibold">🕳️ Musta Aukko</div>
+      <div id="badgeWay3" class="hidden px-2.5 py-1 rounded-full bg-indigo-500/25 border border-indigo-300/80 text-indigo-200 text-[11px] font-semibold">🛰️ SSO-10</div>
+      <div id="badgeWay4" class="hidden px-2.5 py-1 rounded-full bg-fuchsia-500/25 border border-fuchsia-300/80 text-fuchsia-200 text-[11px] font-semibold">🐘 Norsuportaali</div>
+      <div id="badgeWay5" class="hidden px-2.5 py-1 rounded-full bg-rose-500/25 border border-amber-300/80 text-amber-200 text-[11px] font-semibold">🔥 Lisäosa</div>
+      <div id="badgeWay6" class="hidden px-2.5 py-1 rounded-full bg-sky-500/25 border border-sky-300/80 text-sky-200 text-[11px] font-semibold">🪂 Hylkeet &amp; Norsut</div>
+      <div id="badgeWay6Mega" class="hidden px-2.5 py-1 rounded-full bg-pink-500/25 border border-amber-300/85 text-amber-200 text-[11px] font-semibold">✈️💥 MEGA</div>
+      <div id="badgeWay6Ultra" class="hidden px-2.5 py-1 rounded-full bg-red-600/30 border border-yellow-300/90 text-yellow-200 text-[11px] font-semibold">🌌🐋 Hulluin Tila</div>
+      <div id="badgeWay6Bike" class="hidden px-2.5 py-1 rounded-full bg-emerald-600/30 border border-yellow-300/90 text-emerald-200 text-[11px] font-semibold">🚲🐋 Pyöränorsut (20s)</div>
+      <div id="badgeWay6Tsar" class="hidden px-2.5 py-1 rounded-full bg-red-700/40 border border-yellow-300/95 text-yellow-200 text-[11px] font-semibold">🚗☢️ Jättiautot &amp; Tsar</div>
+    </div>
+
+    <div id="topActions" class="flex flex-wrap items-center justify-end gap-1.5 pointer-events-auto">
+      <button id="topBunkerBtn" type="button" class="bunker-btn btn-anim px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl text-white font-bold text-[11px] sm:text-xs tracking-wide cursor-pointer flex items-center gap-1">
+        <span>🛗</span><span>KETUN BUNKKERI</span>
+      </button>
+      <button id="topLabBtn" type="button" class="lab-btn btn-anim px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl text-white font-bold text-[11px] sm:text-xs tracking-wide cursor-pointer flex items-center gap-1">
+        <span>🧪</span><span>KARHUJEN LABRA</span>
+      </button>
+      <button id="topNukeBtn" type="button" class="nuke-btn btn-anim px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl text-white font-bold text-[11px] sm:text-xs tracking-wide cursor-pointer flex items-center gap-1">
+        <span>☢️</span><span>KUUN YDINASE</span>
+      </button>
+      <button id="topSsoBtn" type="button" class="sso-btn btn-anim px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl text-white font-bold text-[11px] sm:text-xs tracking-wide cursor-pointer flex items-center gap-1">
+        <span>🛰️</span><span>SSO-10</span>
+      </button>
+      <button id="topPortalBtn" type="button" class="portal-btn btn-anim px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl text-white font-bold text-[11px] sm:text-xs tracking-wide cursor-pointer flex items-center gap-1">
+        <span>🐘</span><span>NORSUPORTAALI</span>
+      </button>
+      <button id="topDlcBtn" type="button" class="dlc-btn btn-anim px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl text-white font-bold text-[11px] sm:text-xs tracking-wide cursor-pointer flex items-center gap-1">
+        <span>🔥</span><span>LISÄOSA: KAIKKI</span>
+      </button>
+      <button id="topParachuteBtn" type="button" class="para-btn btn-anim px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl text-white font-bold text-[11px] sm:text-xs tracking-wide cursor-pointer flex items-center gap-1">
+        <span>🪂</span><span>HYLKEET &amp; NORSUT</span>
+      </button>
+      <label for="ssoVideoInput" class="glass btn-anim px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl text-slate-100 font-semibold text-[11px] sm:text-xs cursor-pointer flex items-center gap-1">
+        <span>🎬</span><span>Video</span>
+      </label>
+      <input id="ssoVideoInput" type="file" accept="video/*" class="hidden">
+      <button id="downloadZipBtn" type="button" class="glass btn-anim px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-xl text-emerald-200 border border-emerald-400/50 font-bold text-[11px] sm:text-xs cursor-pointer flex items-center gap-1">
+        <span>📦</span><span>Lataa ZIP</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Tapahtumabanneri animaatioiden aikana -->
+  <div id="eventBanner" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 pointer-events-none w-[92%] max-w-xl hidden-overlay transition-overlay">
+    <div class="glass rounded-2xl px-5 py-3 border border-amber-300/45 text-center shadow-[0_0_35px_rgba(251,191,36,0.22)]">
+      <div id="bannerTitle" class="font-display text-sm sm:text-lg font-extrabold text-amber-200 tracking-wide"></div>
+      <div id="bannerSub" class="text-xs sm:text-sm text-slate-200/95 mt-0.5"></div>
+    </div>
+  </div>
+
+  <!-- Päänäkymän käyttöliittymä -->
+  <div id="mainUI" class="fixed inset-0 z-20 pointer-events-none flex flex-col justify-between p-4 sm:p-7 transition-overlay visible-overlay">
+    <div class="mt-28 sm:mt-20 max-w-md">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-300/40 text-amber-200 text-[11px] font-bold tracking-widest uppercase">
+        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+        Pohjolan Hämärän Metsä
+      </div>
+      <h1 class="font-display text-3xl sm:text-5xl font-extrabold tracking-wide text-white drop-shadow-[0_4px_24px_rgba(0,0,0,0.8)] mt-2">
+        ELÄINTEN MAA
+      </h1>
+      <p class="text-xs sm:text-sm text-slate-200/90 mt-1.5 leading-relaxed drop-shadow">
+        Tarkkaile hyperrealistista kettua revontulimetsässä, vieraile Ketun Bunkkerissa, tutki 14 kohteen karttaa tai käynnistä mikä tahansa tuhoase!
+      </p>
+    </div>
+
+    <div class="flex flex-col items-center gap-2.5 pb-1 pointer-events-auto">
+      <button id="openMapBtn" type="button" class="glass btn-anim px-6 py-3.5 rounded-2xl border border-amber-300/55 text-white font-extrabold text-sm sm:text-base tracking-wide flex items-center gap-3 shadow-[0_0_32px_rgba(251,191,36,0.22)] cursor-pointer">
+        <span class="text-xl">🗺️</span>
+        <span>Avaa Eläinten Maan suuri kartta</span>
+        <span class="text-amber-300">→</span>
+      </button>
+      <div class="px-4 py-1.5 rounded-full glass text-[11px] text-slate-300 text-center">
+        Liikuta hiirtä ketun katseen suuntaamiseksi • Kettu menee aina hissillä turvaan maan alle ennen tuhoa!
+      </div>
+    </div>
+  </div>
+
+  <!-- Vierailu Ketun Bunkkerissa -näkymä -->
+  <div id="bunkerOverlay" class="fixed inset-0 z-30 pointer-events-none flex flex-col justify-between p-3 sm:p-6 hidden-overlay transition-overlay">
+    <div class="mt-28 sm:mt-20 flex flex-wrap items-center justify-between gap-2 pointer-events-auto">
+      <div class="flex items-center gap-2">
+        <button id="bunkerBackBtn" type="button" class="glass btn-anim px-4 py-2 rounded-xl text-amber-100 border border-amber-300/45 text-xs sm:text-sm font-semibold cursor-pointer">
+          ↑ Palaa ylös metsään
+        </button>
+        <button id="bunkerOpenMapBtn" type="button" class="glass btn-anim px-3.5 py-2 rounded-xl text-emerald-200 border border-emerald-400/40 text-xs sm:text-sm font-semibold cursor-pointer">
+          🗺️ Avaa kartta
+        </button>
+      </div>
+      <div class="glass px-4 py-1.5 rounded-full border border-emerald-400/50 text-emerald-200 text-xs font-semibold">
+        🔒 Ketun Maanalainen Takkabunkkeri (-180 m)
+      </div>
+    </div>
+
+    <div class="w-full max-w-2xl mx-auto pointer-events-auto">
+      <div class="glass rounded-3xl p-4 sm:p-5 border border-emerald-400/45 shadow-[0_0_45px_rgba(16,185,129,.22)]">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <div class="text-[11px] uppercase tracking-widest text-emerald-300 font-bold">🦊 Vierailu Ketun Bunkkerissa</div>
+            <p id="bunkerStatusText" class="text-xs sm:text-sm text-slate-200 mt-0.5">
+              Kettu rentoutuu syvällä kristalliluolien keskellä lämpimän takan ääressä!
+            </p>
+          </div>
+          <div class="flex flex-wrap gap-2 shrink-0">
+            <button id="bunkerFireBtn" type="button" class="glass btn-anim px-3 py-2 rounded-xl text-amber-200 border border-amber-400/45 text-xs font-bold cursor-pointer">
+              🔥 Lisää takkatulta
+            </button>
+            <button id="bunkerCocoaBtn" type="button" class="glass btn-anim px-3 py-2 rounded-xl text-orange-200 border border-orange-400/45 text-xs font-bold cursor-pointer">
+              ☕ Juo kaakaota
+            </button>
+            <button id="bunkerShieldBtn" type="button" class="glass btn-anim px-3 py-2 rounded-xl text-emerald-200 border border-emerald-400/45 text-xs font-bold cursor-pointer">
+              🛡️ Testaa suojakilpi
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Eläinten Maan 14 kohteen karttanäkymä -->
+  <div id="mapOverlay" class="fixed inset-0 z-30 pointer-events-none flex flex-col justify-between p-3 sm:p-5 hidden-overlay transition-overlay">
+    <div class="mt-28 sm:mt-20 flex flex-wrap items-center justify-between gap-2 pointer-events-auto">
+      <div class="glass rounded-2xl px-4 py-2.5 flex items-center gap-3">
+        <button id="closeMapBtn" type="button" class="px-3 py-1.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 text-amber-200 text-xs font-bold cursor-pointer">
+          ← Takaisin
+        </button>
+        <div>
+          <div class="font-display text-sm sm:text-base font-extrabold text-amber-100">Eläinten Maan Kartta</div>
+          <div class="text-[11px] text-slate-300">14 elävää aluetta • Vedä, zoomaa ja klikkaa kohteita</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <button id="zoomInBtn" type="button" class="glass btn-anim w-9 h-9 rounded-xl text-white font-bold text-base cursor-pointer">+</button>
+        <button id="zoomOutBtn" type="button" class="glass btn-anim w-9 h-9 rounded-xl text-white font-bold text-base cursor-pointer">−</button>
+        <button id="resetMapBtn" type="button" class="glass btn-anim px-3 h-9 rounded-xl text-slate-200 text-xs font-semibold cursor-pointer">Keskitä</button>
+      </div>
+    </div>
+
+    <div class="relative flex-1 my-2 pointer-events-auto rounded-3xl overflow-hidden border border-slate-500/35 shadow-2xl">
+      <canvas id="mapCanvas" class="w-full h-full block cursor-grab active:cursor-grabbing" width="906" height="628"></canvas>
+
+      <!-- Valitun kohteen tietokortti -->
+      <div id="locCard" class="hidden absolute bottom-3 left-3 right-3 sm:left-auto sm:right-4 sm:bottom-4 sm:w-80 glass rounded-2xl p-4 border border-amber-300/45">
+        <div class="flex items-start justify-between gap-2">
+          <div class="flex items-center gap-2.5">
+            <span id="locEmoji" class="text-2xl">🦊</span>
+            <div>
+              <h3 id="locName" class="font-display text-sm sm:text-base font-extrabold text-amber-100">Ketun Metsä</h3>
+              <div id="locSub" class="text-[11px] text-emerald-300 font-semibold">Pohjolan keskus</div>
+            </div>
+          </div>
+          <button id="closeLocCardBtn" type="button" class="text-slate-400 hover:text-white text-sm font-bold px-1.5 cursor-pointer">✕</button>
+        </div>
+        <p id="locDesc" class="text-xs text-slate-200/95 mt-2 leading-relaxed"></p>
+
+        <div id="locBunkerSection" class="hidden mt-3">
+          <button id="openBunkerFromMapBtn" type="button" class="bunker-btn btn-anim w-full py-2.5 px-3 rounded-xl text-white font-extrabold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+            <span>🛗</span><span>Vieraile Ketun maanalaisessa bunkkerissa</span>
+          </button>
+        </div>
+        <div id="locLabSection" class="hidden mt-3">
+          <button id="openLabFromMapBtn" type="button" class="lab-btn btn-anim w-full py-2.5 px-3 rounded-xl text-white font-extrabold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+            <span>🧪</span><span>Avaa Karhujen Salainen Laboratorio</span>
+          </button>
+        </div>
+        <div id="locPortalSection" class="hidden mt-2.5">
+          <button id="openPortalFromMapBtn" type="button" class="portal-btn btn-anim w-full py-2.5 px-3 rounded-xl text-white font-extrabold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+            <span>🌀</span><span>Avaa Norsuportaali Pöllökalliolta!</span>
+          </button>
+        </div>
+        <div id="locDlcSection" class="hidden mt-2">
+          <button id="openDlcFromMapBtn" type="button" class="dlc-btn btn-anim w-full py-2.5 px-3 rounded-xl text-white font-extrabold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+            <span>🐘🔥</span><span>Lisäosa: Norsut tuhoavat koko kartan!</span>
+          </button>
+        </div>
+        <div id="locParachuteSection" class="hidden mt-2.5">
+          <button id="openParachuteFromMapBtn" type="button" class="para-btn btn-anim w-full py-2.5 px-3 rounded-xl text-white font-extrabold text-xs flex items-center justify-center gap-1.5 cursor-pointer">
+            <span>🪂</span><span>Hylkeet &amp; Norsut -valikko!</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Karhujen Salainen Laboratorio -->
+  <div id="labOverlay" class="fixed inset-0 z-30 pointer-events-none flex flex-col justify-between p-4 sm:p-6 hidden-overlay transition-overlay">
+    <div class="mt-28 sm:mt-20 flex flex-wrap items-center justify-between gap-2 pointer-events-auto">
+      <button id="labBackBtn" type="button" class="glass btn-anim px-4 py-2 rounded-xl text-amber-100 border border-amber-300/45 text-xs sm:text-sm font-semibold cursor-pointer">
+        ← Poistu laboratoriosta
+      </button>
+      <div class="glass px-4 py-1.5 rounded-full border border-purple-400/50 text-purple-200 text-xs font-semibold">
+        🧪 Karhuvuorten Salainen Musta Aukko -tutkimuskeskus
+      </div>
+    </div>
+
+    <div class="max-w-lg mx-auto w-full pointer-events-auto">
+      <div class="glass rounded-3xl p-4 sm:p-5 border border-purple-400/45 text-center">
+        <div class="text-xs uppercase tracking-widest text-purple-300 font-bold">2. Tuhotapa: Karhujen Huippusalainen Ase</div>
+        <p class="text-xs sm:text-sm text-slate-200 mt-1">
+          Tiedekarhut ovat rakentaneet kannettavan <strong>Musta Aukko -aseen</strong>. Paina nappia tai klikkaa asetta pöydällä!
+        </p>
+        <button id="fireBlackHoleBtn" type="button" class="blackhole-btn btn-anim mt-3 px-6 py-3 rounded-2xl text-white font-extrabold text-sm cursor-pointer inline-flex items-center gap-2">
+          <span>🕳️</span><span>LAUKAISE MUSTA AUKKO -ASE!</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hylkeet & Norsut -valintavalikko (5 hullua vaihtoehtoa!) -->
+  <div id="parachuteMenuOverlay" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md hidden-overlay transition-overlay">
+    <div class="glass rounded-3xl p-5 sm:p-6 max-w-xl w-full border border-sky-300/45 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-start justify-between gap-3 mb-4">
+        <div>
+          <div class="text-[11px] uppercase tracking-widest text-sky-300 font-bold">🪂 Valitse Kaaostila</div>
+          <h2 class="font-display text-xl sm:text-2xl font-extrabold text-white mt-0.5">Hylkeet &amp; Norsut</h2>
+        </div>
+        <button id="closeParachuteMenuBtn" type="button" class="glass px-3 py-1.5 rounded-xl text-slate-300 hover:text-white text-sm font-bold cursor-pointer">✕</button>
+      </div>
+
+      <div class="flex flex-col gap-2.5">
+        <button id="startParachuteNormBtn" type="button" class="para-btn btn-anim w-full p-3.5 rounded-2xl text-left flex items-center gap-3.5 cursor-pointer">
+          <span class="text-2xl shrink-0">🪂</span>
+          <div>
+            <div class="text-sm sm:text-base font-extrabold text-white">1. Normi Norsut &amp; Hylkeet</div>
+            <div class="text-xs text-sky-100/90 mt-0.5">Kuljetuslentokoneet, laskuvarjohylkeet ja sekoilevat norsut räjäyttävät alueen!</div>
+          </div>
+        </button>
+
+        <button id="startParachuteMegaBtn" type="button" class="mega-jet-btn btn-anim w-full p-3.5 rounded-2xl text-left flex items-center gap-3.5 cursor-pointer">
+          <span class="text-2xl shrink-0">✈️💥</span>
+          <div>
+            <div class="text-sm sm:text-base font-extrabold text-yellow-100">2. MEGA: Hävittäjät &amp; Superräjähdys!</div>
+            <div class="text-xs text-pink-100/95 mt-0.5">7 yliäänihävittäjää jälkipolttimin, sateenkaarivanat ja superkaunis tähtisupernova!</div>
+          </div>
+        </button>
+
+        <button id="startParachuteUltraBtn" type="button" class="ultra-chaos-btn btn-anim w-full p-3.5 rounded-2xl text-left flex items-center gap-3.5 cursor-pointer">
+          <span class="text-2xl shrink-0">🌌🔥</span>
+          <div>
+            <div class="text-sm sm:text-base font-extrabold text-yellow-100">3. HULLUIN TILA (Valaskin räjähtää!)</div>
+            <div class="text-xs text-rose-100/95 mt-0.5">Norsut räjäyttelee, hylkeet mattopommittaa, itse Kosminen Valas räjähtää ja kokoontuu takaisin raivoissaan!</div>
+          </div>
+        </button>
+
+        <button id="startParachuteBikeBtn" type="button" class="bike-chaos-btn btn-anim w-full p-3.5 rounded-2xl text-left flex items-center gap-3.5 cursor-pointer">
+          <span class="text-2xl shrink-0">🚲🐋</span>
+          <div>
+            <div class="text-sm sm:text-base font-extrabold text-yellow-100">4. POLKUPYÖRÄNORSUT! (20 s hullu &amp; kaunis sekoilu!)</div>
+            <div class="text-xs text-emerald-100/95 mt-0.5">Norsut ajavat neonpyörillä, tekevät voltteja, räjäyttävät Valaan ja sekoilevat 20 s!</div>
+          </div>
+        </button>
+
+        <button id="startParachuteTsarBtn" type="button" class="tsar-car-btn btn-anim w-full p-3.5 rounded-2xl text-left flex items-center gap-3.5 cursor-pointer">
+          <span class="text-2xl shrink-0">🚗☢️</span>
+          <div>
+            <div class="text-sm sm:text-base font-extrabold text-yellow-100">5. JÄTTIAUTOT &amp; TSAR BOMBA! (Valas raivostuu!)</div>
+            <div class="text-xs text-amber-100/95 mt-0.5">Norsut kaahaavat jättiautoilla, tuovat Tsar Bomba -ydinpommeja ja räjäyttävät itse Valaan raivon partaalle!</div>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Oma SSO-10 -video overlay -->
+  <div id="ssoVideoWrap" class="fixed inset-0 z-40 bg-black flex items-center justify-center hidden-overlay transition-overlay">
+    <video id="ssoVideoEl" class="w-full h-full object-cover" playsinline=""></video>
+    <button id="skipVideoBtn" type="button" class="fixed bottom-6 right-6 glass px-4 py-2 rounded-xl text-white text-xs font-bold cursor-pointer">Ohita video →</button>
+  </div>
+
+  <!-- Kosmisen Valaan kohtaaminen -->
+  <div id="whaleOverlay" class="fixed inset-0 z-40 pointer-events-none flex flex-col justify-between p-3 sm:p-6 hidden-overlay transition-overlay">
+    <div class="flex justify-center mt-14 sm:mt-4 pointer-events-auto">
+      <div class="glass px-5 py-2.5 rounded-2xl border border-amber-300/55 flex items-center gap-3 shadow-[0_0_30px_rgba(251,191,36,0.22)]">
+        <span class="text-2xl">💰</span>
+        <div>
+          <div class="text-[10px] uppercase tracking-widest text-amber-300 font-bold">Lompakkosi</div>
+          <div class="text-lg font-extrabold text-white leading-tight">∞ €</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="max-w-2xl w-full mx-auto pointer-events-auto">
+      <div class="glass rounded-3xl p-4 sm:p-5 border border-sky-300/45 shadow-[0_0_45px_rgba(56,189,248,0.22)]">
+        <div class="text-[11px] uppercase tracking-widest text-sky-300 font-bold">🐋 Kosminen Valas puhuu:</div>
+        <p id="whaleSpeech" class="text-sm sm:text-base text-white font-medium mt-1 leading-relaxed"></p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4">
+          <button id="whalePayBtn" type="button" class="btn-anim bg-gradient-to-r from-emerald-600 to-teal-500 border border-emerald-200/70 px-4 py-2.5 rounded-xl text-white font-bold text-xs sm:text-sm cursor-pointer">
+            💶 Maksa 999 € (Korjaa maailma)
+          </button>
+          <button id="whaleMegaPayBtn" type="button" class="btn-anim bg-gradient-to-r from-amber-500 to-yellow-500 border border-yellow-100/80 px-4 py-2.5 rounded-xl text-slate-950 font-extrabold text-xs sm:text-sm cursor-pointer">
+            🪙 Maksa 999 999 € (Kultasade!)
+          </button>
+          <button id="whaleHugBtn" type="button" class="btn-anim bg-gradient-to-r from-pink-600 to-purple-600 border border-pink-200/70 px-4 py-2.5 rounded-xl text-white font-bold text-xs sm:text-sm cursor-pointer">
+            💖 Halaa Valasta &amp; pyydä anteeksi
+          </button>
+          <button id="whaleLaserBtn" type="button" class="btn-anim bg-gradient-to-r from-red-700 to-orange-600 border border-red-300/70 px-4 py-2.5 rounded-xl text-white font-bold text-xs sm:text-sm cursor-pointer">
+            ⚡ Ammu Valasta laserilla!
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ilmoituspalkki (ei koskaan alert()) -->
+  <div id="toastBox" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none glass px-4 py-2 rounded-xl border border-emerald-400/60 text-emerald-200 text-xs font-bold opacity-0 transition-opacity duration-300"></div>
+
+<script>
+(() => {
+  'use strict';
+
+  const $ = id => document.getElementById(id);
+  const canvas = $('sceneCanvas');
+  const ctx = canvas.getContext('2d');
+  const mapCanvas = $('mapCanvas');
+  const mctx = mapCanvas.getContext('2d');
+
+  // Varmista ctx.roundRect kaikissa selaimissa
+  if (!CanvasRenderingContext2D.prototype.roundRect) {
+    CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r = 8) {
+      const rad = Array.isArray(r) ? r[0] : r;
+      this.moveTo(x + rad, y);
+      this.arcTo(x + w, y, x + w, y + h, rad);
+      this.arcTo(x + w, y + h, x, y + h, rad);
+      this.arcTo(x, y + h, x, y, rad);
+      this.arcTo(x, y, x + w, y, rad);
+      this.closePath();
+      return this;
+    };
+  }
+
+  let W = window.innerWidth || 1280;
+  let H = window.innerHeight || 720;
+  let dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  function showEl(el, show) {
+    if (!el) return;
+    el.classList.toggle('hidden-overlay', !show);
+    el.classList.toggle('visible-overlay', show);
+  }
+  function setTopActionsVisible(v) {
+    const el = $('topActions');
+    if (!el) return;
+    el.style.opacity = v ? '1' : '0';
+    el.style.pointerEvents = v ? 'auto' : 'none';
+  }
+  function setBanner(show, title = '', sub = '') {
+    if (title) $('bannerTitle').textContent = title;
+    if (sub) $('bannerSub').textContent = sub;
+    showEl($('eventBanner'), show);
+  }
+  let toastTimer = null;
+  function showToast(msg) {
+    const tb = $('toastBox');
+    tb.textContent = msg;
+    tb.style.opacity = '1';
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { tb.style.opacity = '0'; }, 2600);
+  }
+
+  /* =====================================================================
+     1. ÄÄNIMOOTTORI (Web Audio API — ei ulkoisia äänitiedostoja)
+     ===================================================================== */
+  const snd = {
+    ctx: null,
+    enabled: true,
+    ensure() {
+      if (!this.enabled) return null;
+      if (!this.ctx) {
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (AC) this.ctx = new AC();
+      }
+      if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
+      return this.ctx;
+    },
+    toggle() {
+      this.enabled = !this.enabled;
+      return this.enabled;
+    },
+    tone(type, f1, f2, dur, vol = 0.15, delay = 0) {
+      const c = this.ensure();
+      if (!c) return;
+      const now = c.currentTime + delay;
+      const o = c.createOscillator();
+      const g = c.createGain();
+      o.type = type;
+      o.frequency.setValueAtTime(Math.max(18, f1), now);
+      o.frequency.exponentialRampToValueAtTime(Math.max(18, f2), now + dur);
+      g.gain.setValueAtTime(0.0001, now);
+      g.gain.linearRampToValueAtTime(vol, now + Math.min(0.04, dur * 0.25));
+      g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+      o.connect(g); g.connect(c.destination);
+      o.start(now); o.stop(now + dur + 0.02);
+    },
+    noise(dur, freq = 1400, vol = 0.25, delay = 0) {
+      const c = this.ensure();
+      if (!c) return;
+      const now = c.currentTime + delay;
+      const len = Math.max(1, Math.floor(c.sampleRate * dur));
+      const buf = c.createBuffer(1, len, c.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+      const src = c.createBufferSource(); src.buffer = buf;
+      const flt = c.createBiquadFilter(); flt.type = 'lowpass';
+      flt.frequency.setValueAtTime(freq, now);
+      flt.frequency.exponentialRampToValueAtTime(80, now + dur);
+      const g = c.createGain();
+      g.gain.setValueAtTime(vol, now);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+      src.connect(flt); flt.connect(g); g.connect(c.destination);
+      src.start(now); src.stop(now + dur + 0.02);
+    },
+    playShelter() {
+      this.tone('square', 660, 440, 0.14, 0.08, 0.05);
+      this.tone('square', 660, 440, 0.14, 0.08, 0.35);
+      this.tone('sawtooth', 140, 62, 1.9, 0.12, 0.55);
+      this.tone('sine', 420, 840, 0.32, 0.12, 2.55);
+    },
+    playNuke() {
+      this.tone('sawtooth', 90, 420, 1.6, 0.16, 0.2);
+      this.noise(1.5, 1800, 0.24, 0.3);
+      this.tone('sine', 160, 20, 2.8, 0.65, 2.2);
+      this.noise(3.2, 3400, 0.65, 2.2);
+    },
+    playBlackHole() {
+      this.tone('sine', 120, 32, 4.5, 0.35, 0);
+      this.tone('sawtooth', 260, 48, 4.2, 0.2, 0.3);
+      this.noise(3.8, 1200, 0.3, 0.5);
+    },
+    playSSO() {
+      this.tone('sine', 220, 1100, 2.2, 0.18, 0.2);
+      this.tone('sawtooth', 880, 140, 2.4, 0.28, 2.5);
+      this.noise(2.8, 3600, 0.5, 2.6);
+    },
+    playElephantPortal() {
+      this.tone('sine', 90, 620, 1.4, 0.18, 0);
+      [1.1, 1.9, 2.7, 3.6, 4.5].forEach((d, idx) => {
+        const b = 230 + (idx % 3) * 60;
+        this.tone('sawtooth', b, b * 1.9, 0.2, 0.15, d);
+        this.tone('triangle', 150, 26, 0.7, 0.35, d + 0.5);
+        this.noise(0.7, 1900, 0.3, d + 0.5);
+      });
+      this.tone('sine', 150, 18, 2.4, 0.65, 6.2);
+      this.noise(2.6, 3200, 0.6, 6.2);
+    },
+    playElephantDLC() {
+      [0, 0.45, 0.9].forEach(d => this.tone('sine', 80, 560, 1.2, 0.15, d));
+      for (let i = 0; i < 14; i++) {
+        const ht = 2.0 + i * 0.65;
+        if (i % 2 === 0) this.tone('sawtooth', 220 + (i % 4) * 55, 440, 0.18, 0.12, ht - 0.25);
+        this.tone('triangle', 160, 24, 0.6, 0.3, ht);
+        this.noise(0.6, 2100, 0.28, ht);
+      }
+      this.tone('sine', 140, 16, 3.0, 0.7, 11.8);
+      this.noise(3.2, 3600, 0.65, 11.8);
+    },
+    playParachute(mode) {
+      if (mode === 'tsar') {
+        [0.2, 1.5, 2.8, 4.2, 5.6].forEach((d, idx) => {
+          this.tone('sawtooth', 78 + idx * 10, 42, 0.9, 0.2, d);
+          this.tone('sine', 160, 22, 1.3, 0.55, d + 0.55);
+          this.noise(1.1, 2500, 0.48, d + 0.55);
+        });
+        this.tone('triangle', 190, 18, 3.0, 0.75, 6.9);
+        this.noise(3.6, 3800, 0.75, 6.9);
+        this.tone('sawtooth', 98, 34, 2.2, 0.45, 10.6);
+        return;
+      }
+      if (mode === 'bike') {
+        [0.4, 1.8, 3.3, 5.0, 6.6].forEach((d, i) => {
+          this.tone('triangle', 880 + i * 110, 1320, 0.12, 0.12, d);
+          this.tone('sawtooth', 240, 460, 0.2, 0.14, d + 0.3);
+          this.noise(0.7, 2200, 0.32, d + 0.6);
+        });
+        this.tone('triangle', 180, 18, 2.8, 0.75, 9.0);
+        this.noise(3.2, 3900, 0.7, 9.0);
+        this.tone('sawtooth', 95, 34, 2.0, 0.45, 13.6);
+        return;
+      }
+      if (mode === 'ultra') {
+        [0.2, 1.0, 1.9, 2.9, 3.8].forEach((d, i) => {
+          this.noise(0.7, 2400, 0.28, d);
+          this.tone('sawtooth', 230 + i * 30, 440, 0.18, 0.13, d + 0.15);
+        });
+        this.tone('triangle', 185, 18, 2.5, 0.75, 4.9);
+        this.noise(3.2, 4000, 0.72, 4.9);
+        this.tone('sawtooth', 92, 34, 1.8, 0.42, 7.2);
+        return;
+      }
+      const cnt = mode === 'mega' ? 6 : 4;
+      for (let i = 0; i < cnt; i++) {
+        this.noise(0.7, 2200, 0.28, 0.3 + i * 0.9);
+        this.tone('triangle', 160, 26, 0.65, 0.35, 0.6 + i * 0.9);
+      }
+      this.tone('sine', 150, 18, 2.4, 0.65, mode === 'mega' ? 6.5 : 5.6);
+      this.noise(2.6, 3600, 0.6, mode === 'mega' ? 6.5 : 5.6);
+    },
+    playWhale(happy = false) {
+      const notes = happy ? [196, 261.6, 329.6, 392] : [98, 130.8, 174.6];
+      notes.forEach((f, i) => this.tone('sine', f, f * 1.15, 2.0, 0.12, i * 0.2));
+    }
+  };
+
+  /* =====================================================================
+     2. KARTAN 14 ALUEEN TIEDOT
+     ===================================================================== */
+  const MAP_W = 1600, MAP_H = 1000;
+  const LOCATIONS = [
+    { id: 'ketun-metsa', name: 'Ketun Metsä', sub: 'Pohjolan Sydän • Bunkkeri', emoji: '🦊', x: 780, y: 520, col: '#f97316', desc: 'Tiheä kuutamokuusikko, jossa hyperrealistinen kettu asuu ja jonka alla sijaitsee -180 m syvä takkabunkkeri!' },
+    { id: 'karhuvuoret', name: 'Karhuvuoret', sub: 'Salainen Laboratorio', emoji: '🐻', x: 1120, y: 310, col: '#eab308', desc: 'Jylhät vuorenhuiput ja tiedekarhujen huippusalainen laboratorio, jossa kehitetään Musta Aukko -asetta.' },
+    { id: 'pollokallio', name: 'Pöllökallio', sub: 'Norsuportaali & Lisäosa', emoji: '🦉', x: 460, y: 270, col: '#a855f7', desc: 'Muinaisten riimujen kallio, jolta voi avata Norsuportaalin tai käynnistää koko kartan tuhoavan Lisäosan!' },
+    { id: 'syvajarvi', name: 'Syväjärvi & Norppaluoto', sub: 'Hylkeiden tukikohta', emoji: '🦭', x: 520, y: 690, col: '#38bdf8', desc: 'Kristallinkirkas järvi, jonka yltä hylkeet ja norsut aloittavat hurjat laskuvarjo- ja jättiautohyökkäyksensä!' },
+    { id: 'susiharju', name: 'Susiharju', sub: 'Kuutamoharjanne', emoji: '🐺', x: 260, y: 460, col: '#94a3b8', desc: 'Korkea harjanne, jolla susilauma ulvoo revontulien loisteessa.' },
+    { id: 'hirvisuo', name: 'Hirvisuo', sub: 'Sumuinen erämaa', emoji: '🫎', x: 960, y: 690, col: '#10b981', desc: 'Laaja suomaa, jossa kruunupäiset hirvet vaeltavat aamu-usvassa.' },
+    { id: 'ilveskuru', name: 'Ilveskuru', sub: 'Kalliosola', emoji: '🐱', x: 1290, y: 520, col: '#f59e0b', desc: 'Salaperäinen rotko, jossa tupsukorvaiset ilvekset tarkkailevat kulkijoita.' },
+    { id: 'revontulihuippu', name: 'Revontulihuippu', sub: 'Pohjoinen tunturi', emoji: '✨', x: 790, y: 165, col: '#34d399', desc: 'Koko Eläinten Maan korkein tunturi, jossa revontulet koskettavat lunta.' },
+    { id: 'joutsenlahti', name: 'Joutsenlahti', sub: 'Eteläinen merenlahti', emoji: '🦢', x: 760, y: 845, col: '#e2e8f0', desc: 'Tyyni merenlahti, jossa laulujoutsenet kokoontuvat iltahämärässä.' },
+    { id: 'majavapato', name: 'Majavapato', sub: 'Virtajoki', emoji: '🦫', x: 615, y: 455, col: '#b45309', desc: 'Taitavien majavien rakentama jättipato ja vesiputous.' },
+    { id: 'oravalehto', name: 'Oravalehto', sub: 'Käpymetsä', emoji: '🐿️', x: 950, y: 430, col: '#fb923c', desc: 'Vilkas lehtometsä täynnä käpyvarastoja ja puunlatvojen polkuja.' },
+    { id: 'kotkanpesa', name: 'Kotkanpesä', sub: 'Pilvikallio', emoji: '🦅', x: 1360, y: 245, col: '#cbd5e1', desc: 'Korkea kallionkieleke, jolta merikotkat valvovat koko valtakuntaa.' },
+    { id: 'ahmaluola', name: 'Ahmaluola', sub: 'Jääluolasto', emoji: '🦡', x: 300, y: 745, col: '#6366f1', desc: 'Kimmeltävä jääluola, jonka syvyyksissä loistavat siniset kristallit.' },
+    { id: 'poroniitty', name: 'Poroniitty', sub: 'Tunturilakeus', emoji: '🦌', x: 1210, y: 755, col: '#f472b6', desc: 'Avara jäkäläkangas, jolla valkoiset porot laiduntavat rauhassa.' }
+  ];
+
+  /* =====================================================================
+     3. SOVELLUKSEN TILA
+     ===================================================================== */
+  const app = {
+    state: 'MAIN',
+    stateTime: 0,
+    time: 0,
+    mouseX: W * 0.5,
+    mouseY: H * 0.5,
+    hasKey: false,
+    foundWay2: false,
+    foundWay3: false,
+    foundWay4: false,
+    foundWay5: false,
+    foundWay6: false,
+    foundWay6Mega: false,
+    foundWay6Ultra: false,
+    foundWay6Bike: false,
+    foundWay6Tsar: false,
+    pendingMode: null,
+    lastMode: 'nuke',
+    repairVariant: 'standard',
+    ssoVideoUrl: null,
+    shake: 0,
+    flash: 0,
+    hoverMoon: false,
+    hoverLabGun: false,
+    moon: { x: 0, y: 0, r: 62, sx: 0, sy: 0, hitR: 46 },
+    labGun: { x: 0, y: 0, hitR: 64 },
+    // Bunkkerivierailu & evakuointi
+    bunkerFireBoost: 0,
+    bunkerShieldTest: 0,
+    bunkerHearts: [],
+    shelterEmbers: [],
+    // Kartta
+    mapCam: { x: MAP_W * 0.5, y: MAP_H * 0.5, zoom: 0.72, drag: false, lx: 0, ly: 0 },
+    selectedLoc: null,
+    // Animaatio-oliot
+    stars: [],
+    shootingStars: [],
+    fireflies: [],
+    labBubbles: [],
+    missile: { sx: 0, sy: 0, x: 0, y: 0, tx: 0, ty: 0, trail: [] },
+    expParts: [],
+    shocks: [],
+    cracks: [],
+    bhObjs: [],
+    ssoSparks: [],
+    elephants: [],
+    eleNukes: [],
+    eleBooms: [],
+    eleBears: [],
+    dlcElephants: [],
+    dlcMissiles: [],
+    dlcBooms: [],
+    dlcCraters: [],
+    dlcAnimals: [],
+    dlcDestroyed: 0,
+    dlcNextIdx: 0,
+    paraPlanes: [],
+    paraJumpers: [],
+    paraBombs: [],
+    paraBooms: [],
+    paraUltraWhaleExploded: false,
+    ultraShards: [],
+    paraBikeRiders: [],
+    paraBikeProjs: [],
+    paraTsarCars: [],
+    paraTsarBombs: [],
+    paraTsarClouds: [],
+    // Kosminen Valas
+    whaleMood: 'calm',
+    whaleHearts: [],
+    whaleCoins: [],
+    whaleLaser: null,
+    repairParts: []
+  };
+
+  function updateBadges() {
+    if (app.hasKey) $('badgeKey').classList.remove('hidden');
+    if (app.foundWay2) $('badgeWay2').classList.remove('hidden');
+    if (app.foundWay3) $('badgeWay3').classList.remove('hidden');
+    if (app.foundWay4) $('badgeWay4').classList.remove('hidden');
+    if (app.foundWay5) $('badgeWay5').classList.remove('hidden');
+    if (app.foundWay6) $('badgeWay6').classList.remove('hidden');
+    if (app.foundWay6Mega) $('badgeWay6Mega').classList.remove('hidden');
+    if (app.foundWay6Ultra) $('badgeWay6Ultra').classList.remove('hidden');
+    if (app.foundWay6Bike) $('badgeWay6Bike').classList.remove('hidden');
+    if (app.foundWay6Tsar) $('badgeWay6Tsar').classList.remove('hidden');
+  }
+
+  /* =====================================================================
+     4. OFFSCREEN-GRAFIIKKA: KUU & HYPERREALISTINEN KETTU
+     ===================================================================== */
+  let moonCanvas = null;
+  let foxBodyCanvas = null;
+  let foxHeadCanvas = null;
+  const FOX_S = 520;
+
+  function createMoonAsset() {
+    const s = 180;
+    moonCanvas = document.createElement('canvas');
+    moonCanvas.width = s; moonCanvas.height = s;
+    const c = moonCanvas.getContext('2d');
+    const cx = s / 2, cy = s / 2, r = 68;
+    const g = c.createRadialGradient(cx - 20, cy - 22, 8, cx, cy, r);
+    g.addColorStop(0, '#fffdf5'); g.addColorStop(0.55, '#e2e8f0'); g.addColorStop(0.85, '#94a3b8'); g.addColorStop(1, '#475569');
+    c.fillStyle = g; c.beginPath(); c.arc(cx, cy, r, 0, Math.PI * 2); c.fill();
+    // Kraatterit
+    [[cx - 24, cy - 16, 14], [cx + 22, cy - 24, 10], [cx + 18, cy + 16, 17], [cx - 18, cy + 26, 9], [cx + 2, cy + 4, 11]].forEach(([x, y, cr]) => {
+      c.fillStyle = 'rgba(71, 85, 105, 0.25)';
+      c.beginPath(); c.arc(x, y, cr, 0, Math.PI * 2); c.fill();
+    });
+  }
+
+  function paintFurPoly(c, pts, baseCol, lightCol, darkCol, count = 260) {
+    c.save();
+    c.beginPath();
+    pts.forEach((p, i) => i === 0 ? c.moveTo(p[0], p[1]) : c.lineTo(p[0], p[1]));
+    c.closePath();
+    c.fillStyle = baseCol; c.fill();
+    c.clip();
+    let minX = 9999, maxX = -9999, minY = 9999, maxY = -9999;
+    pts.forEach(([x, y]) => { minX = Math.min(minX, x); maxX = Math.max(maxX, x); minY = Math.min(minY, y); maxY = Math.max(maxY, y); });
+    for (let i = 0; i < count; i++) {
+      const x = minX + Math.random() * (maxX - minX);
+      const y = minY + Math.random() * (maxY - minY);
+      const len = 7 + Math.random() * 14;
+      const ang = Math.PI * 0.5 + (Math.random() - 0.5) * 0.65;
+      c.strokeStyle = i % 3 === 0 ? lightCol : (i % 3 === 1 ? darkCol : baseCol);
+      c.lineWidth = 1.1 + Math.random() * 1.4;
+      c.beginPath(); c.moveTo(x, y); c.lineTo(x + Math.cos(ang) * len, y + Math.sin(ang) * len); c.stroke();
+    }
+    c.restore();
+  }
+
+  function createFoxAssets() {
+    foxBodyCanvas = document.createElement('canvas');
+    foxBodyCanvas.width = FOX_S; foxBodyCanvas.height = FOX_S;
+    const b = foxBodyCanvas.getContext('2d');
+    const cx = FOX_S / 2, cy = FOX_S / 2;
+    // Tuuhea häntä
+    paintFurPoly(b, [[cx + 45, cy + 125], [cx + 150, cy + 80], [cx + 210, cy + 135], [cx + 175, cy + 195], [cx + 70, cy + 195]], '#c2410c', '#fb923c', '#7c2d12', 260);
+    paintFurPoly(b, [[cx + 155, cy + 100], [cx + 215, cy + 135], [cx + 185, cy + 195], [cx + 140, cy + 175]], '#f8fafc', '#ffffff', '#cbd5e1', 110);
+    // Runko
+    paintFurPoly(b, [[cx - 95, cy + 198], [cx - 72, cy + 55], [cx + 72, cy + 55], [cx + 95, cy + 198]], '#c2410c', '#f97316', '#7c2d12', 360);
+    // Valkoinen rinta
+    paintFurPoly(b, [[cx - 46, cy + 62], [cx + 46, cy + 62], [cx + 38, cy + 198], [cx - 38, cy + 198]], '#f8fafc', '#ffffff', '#e2e8f0', 220);
+    // Tummat tassut
+    paintFurPoly(b, [[cx - 56, cy + 148], [cx - 24, cy + 148], [cx - 22, cy + 200], [cx - 58, cy + 200]], '#1c1917', '#44403c', '#09090b', 80);
+    paintFurPoly(b, [[cx + 24, cy + 148], [cx + 56, cy + 148], [cx + 58, cy + 200], [cx + 22, cy + 200]], '#1c1917', '#44403c', '#09090b', 80);
+
+    foxHeadCanvas = document.createElement('canvas');
+    foxHeadCanvas.width = FOX_S; foxHeadCanvas.height = FOX_S;
+    const h = foxHeadCanvas.getContext('2d');
+    // Korvat
+    paintFurPoly(h, [[cx - 88, cy - 45], [cx - 96, cy - 172], [cx - 22, cy - 92]], '#1c1917', '#7c2d12', '#09090b', 150);
+    paintFurPoly(h, [[cx - 74, cy - 60], [cx - 80, cy - 140], [cx - 34, cy - 86]], '#fef3c7', '#ffffff', '#d6d3d1', 85);
+    paintFurPoly(h, [[cx + 88, cy - 45], [cx + 96, cy - 172], [cx + 22, cy - 92]], '#1c1917', '#7c2d12', '#09090b', 150);
+    paintFurPoly(h, [[cx + 74, cy - 60], [cx + 80, cy - 140], [cx + 34, cy - 86]], '#fef3c7', '#ffffff', '#d6d3d1', 85);
+    // Pää
+    paintFurPoly(h, [[cx, cy - 115], [cx + 88, cy - 55], [cx + 106, cy + 8], [cx, cy + 72], [cx - 106, cy + 8], [cx - 88, cy - 55]], '#c2410c', '#fb923c', '#7c2d12', 420);
+    // Valkoiset posket
+    paintFurPoly(h, [[cx - 106, cy + 8], [cx - 26, cy + 8], [cx - 12, cy + 62], [cx - 86, cy + 44]], '#f8fafc', '#ffffff', '#cbd5e1', 150);
+    paintFurPoly(h, [[cx + 106, cy + 8], [cx + 26, cy + 8], [cx + 12, cy + 62], [cx + 86, cy + 44]], '#f8fafc', '#ffffff', '#cbd5e1', 150);
+    // Kuono & kirsu
+    paintFurPoly(h, [[cx - 26, cy - 8], [cx + 26, cy - 8], [cx + 16, cy + 56], [cx - 16, cy + 56]], '#ea580c', '#fb923c', '#9a3412', 95);
+    h.fillStyle = '#09090b';
+    h.beginPath(); h.ellipse(cx, cy + 40, 18, 12, 0, 0, Math.PI * 2); h.fill();
+    h.fillStyle = 'rgba(255,255,255,0.45)';
+    h.beginPath(); h.ellipse(cx - 5, cy + 36, 6, 3.5, -0.2, 0, Math.PI * 2); h.fill();
+    // Hymy & viikset
+    h.strokeStyle = '#09090b'; h.lineWidth = 2.6;
+    h.beginPath(); h.moveTo(cx, cy + 52); h.quadraticCurveTo(cx - 14, cy + 63, cx - 24, cy + 54); h.moveTo(cx, cy + 52); h.quadraticCurveTo(cx + 14, cy + 63, cx + 24, cy + 54); h.stroke();
+    h.strokeStyle = 'rgba(226,232,240,0.6)'; h.lineWidth = 1.2;
+    [-1, 1].forEach(s => {
+      for (let i = 0; i < 3; i++) {
+        h.beginPath(); h.moveTo(cx + s * 36, cy + 42 + i * 6); h.lineTo(cx + s * 96, cy + 36 + i * 11); h.stroke();
+      }
+    });
+  }
+
+  function drawFoxEyes(cx, cy, sc) {
+    const dx = Math.max(-1, Math.min(1, (app.mouseX - cx) / (W * 0.45)));
+    const dy = Math.max(-1, Math.min(1, (app.mouseY - cy) / (H * 0.45)));
+    [-38, 38].forEach(ex => {
+      const px = cx + ex * sc, py = cy - 22 * sc;
+      ctx.save();
+      ctx.translate(px, py);
+      ctx.fillStyle = '#09090b';
+      ctx.beginPath(); ctx.ellipse(0, 0, 21 * sc, 12 * sc, ex < 0 ? 0.14 : -0.14, 0, Math.PI * 2); ctx.fill();
+      const ig = ctx.createRadialGradient(dx * 4 * sc, dy * 2 * sc, 1, 0, 0, 14 * sc);
+      ig.addColorStop(0, '#fef08a'); ig.addColorStop(0.55, '#f59e0b'); ig.addColorStop(1, '#b45309');
+      ctx.fillStyle = ig;
+      ctx.beginPath(); ctx.ellipse(dx * 3 * sc, dy * 2 * sc, 14 * sc, 9 * sc, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#09090b';
+      ctx.beginPath(); ctx.ellipse(dx * 4.5 * sc, dy * 2 * sc, 4 * sc, 8 * sc, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(dx * 3 * sc - 4 * sc, dy * 2 * sc - 3 * sc, 2.8 * sc, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    });
+  }
+
+  function initAmbient() {
+    app.stars = Array.from({ length: 180 }, () => ({
+      x: Math.random(), y: Math.random() * 0.65, r: 0.6 + Math.random() * 1.9, ph: Math.random() * 6.28, spd: 0.8 + Math.random() * 2.4
+    }));
+    app.fireflies = Array.from({ length: 46 }, () => ({
+      x: Math.random(), y: 0.42 + Math.random() * 0.55, vx: (Math.random() - 0.5) * 0.012, vy: -0.004 - Math.random() * 0.008, r: 1.5 + Math.random() * 2.5, ph: Math.random() * 6.28
+    }));
+    app.labBubbles = Array.from({ length: 28 }, () => ({
+      x: Math.random(), y: Math.random(), r: 2 + Math.random() * 5, spd: 20 + Math.random() * 36, hue: 140 + Math.random() * 140
+    }));
+    app.shelterEmbers = Array.from({ length: 26 }, () => ({
+      x: (Math.random() - 0.5) * 32, y: Math.random() * 44, vy: 20 + Math.random() * 30, r: 1.5 + Math.random() * 2.4, ph: Math.random() * 6.28
+    }));
+    app.shootingStars = [];
+  }
+
+  function updateGeometry() {
+    app.moon.x = W * 0.82;
+    app.moon.y = Math.max(135, H * 0.22);
+    app.moon.r = Math.min(W, H) * 0.088;
+    app.moon.sx = app.moon.x - app.moon.r * 0.12;
+    app.moon.sy = app.moon.y + app.moon.r * 0.1;
+    app.moon.hitR = Math.max(46, app.moon.r * 0.9);
+    app.labGun.x = W * 0.5;
+    app.labGun.y = H * 0.52;
+    app.labGun.hitR = 72;
+  }
+
+  /* =====================================================================
+     5. PÄÄNÄKYMÄ: KUUTAMOMETSÄ, REVONTULET, KUU & KETTU
+     ===================================================================== */
+  function drawMainScene(dt, withFox = true, siloOpen = 0) {
+    const sky = ctx.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, '#020617'); sky.addColorStop(0.35, '#091533'); sky.addColorStop(0.7, '#16284d'); sky.addColorStop(1, '#070e1c');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, H);
+
+    // 3-kerroksiset revontulet
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    const auroraCols = ['rgba(52,211,153,.16)', 'rgba(129,140,248,.14)', 'rgba(236,72,153,.10)'];
+    for (let a = 0; a < 3; a++) {
+      const ay = H * (0.14 + a * 0.08);
+      const ag = ctx.createLinearGradient(0, ay - 75, 0, ay + 105);
+      ag.addColorStop(0, 'rgba(16,185,129,0)');
+      ag.addColorStop(0.5, auroraCols[a]);
+      ag.addColorStop(1, 'rgba(56,189,248,0)');
+      ctx.fillStyle = ag;
+      ctx.beginPath(); ctx.moveTo(0, ay + 95);
+      for (let x = 0; x <= W; x += 55) {
+        const wave = Math.sin(x * 0.0042 + app.time * (0.45 + a * 0.22) + a * 2.1) * 38 + Math.cos(x * 0.009 - app.time * 0.6) * 14;
+        ctx.lineTo(x, ay + wave);
+      }
+      ctx.lineTo(W, ay + 135); ctx.lineTo(0, ay + 135); ctx.closePath(); ctx.fill();
+    }
+    ctx.restore();
+
+    // Tähdet
+    app.stars.forEach(s => {
+      const a = 0.25 + 0.75 * (0.5 + 0.5 * Math.sin(app.time * s.spd + s.ph));
+      ctx.fillStyle = `rgba(226,232,240,${a})`;
+      ctx.beginPath(); ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2); ctx.fill();
+    });
+
+    // Tähdenlennot
+    if (Math.random() < dt * 0.45 && app.shootingStars.length < 3) {
+      app.shootingStars.push({ x: Math.random() * W * 0.85, y: Math.random() * H * 0.3, vx: 380 + Math.random() * 240, vy: 110 + Math.random() * 90, life: 1 });
+    }
+    ctx.save(); ctx.globalCompositeOperation = 'screen';
+    for (let i = app.shootingStars.length - 1; i >= 0; i--) {
+      const st = app.shootingStars[i];
+      st.x += st.vx * dt; st.y += st.vy * dt; st.life -= dt * 1.4;
+      if (st.life <= 0) { app.shootingStars.splice(i, 1); continue; }
+      const sg = ctx.createLinearGradient(st.x, st.y, st.x - st.vx * 0.16, st.y - st.vy * 0.16);
+      sg.addColorStop(0, `rgba(255,255,255,${st.life})`); sg.addColorStop(1, 'rgba(125,211,252,0)');
+      ctx.strokeStyle = sg; ctx.lineWidth = 2.2;
+      ctx.beginPath(); ctx.moveTo(st.x, st.y); ctx.lineTo(st.x - st.vx * 0.16, st.y - st.vy * 0.16); ctx.stroke();
+    }
+    ctx.restore();
+
+    // Kuu ja ydinasesiilo
+    const mx = app.moon.x, my = app.moon.y, mr = app.moon.r;
+    const mg = ctx.createRadialGradient(mx, my, mr * 0.5, mx, my, mr * 2.5);
+    mg.addColorStop(0, app.hoverMoon ? 'rgba(251,146,60,0.42)' : 'rgba(226,232,240,0.28)');
+    mg.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = mg; ctx.beginPath(); ctx.arc(mx, my, mr * 2.5, 0, Math.PI * 2); ctx.fill();
+    if (moonCanvas) ctx.drawImage(moonCanvas, mx - mr * 1.25, my - mr * 1.25, mr * 2.5, mr * 2.5);
+
+    // Siilon kansi kuussa
+    const sw = mr * 0.42, sh = mr * 0.24;
+    ctx.save(); ctx.translate(app.moon.sx, app.moon.sy);
+    ctx.fillStyle = '#09090b'; ctx.beginPath(); ctx.roundRect(-sw / 2, -sh / 2, sw, sh, 4); ctx.fill();
+    if (siloOpen > 0.05) {
+      const sg = ctx.createRadialGradient(0, 0, 2, 0, 0, sw * 0.9);
+      sg.addColorStop(0, '#fef08a'); sg.addColorStop(0.5, '#f97316'); sg.addColorStop(1, 'rgba(239,68,68,0)');
+      ctx.fillStyle = sg; ctx.beginPath(); ctx.arc(0, 0, sw * 0.85 * siloOpen, 0, Math.PI * 2); ctx.fill();
+    }
+    const slide = sw * 0.48 * siloOpen;
+    ctx.fillStyle = '#334155'; ctx.strokeStyle = app.hoverMoon ? '#fb923c' : '#94a3b8'; ctx.lineWidth = 1.5;
+    ctx.fillRect(-sw / 2 - slide, -sh / 2, sw / 2, sh); ctx.strokeRect(-sw / 2 - slide, -sh / 2, sw / 2, sh);
+    ctx.fillRect(slide, -sh / 2, sw / 2, sh); ctx.strokeRect(slide, -sh / 2, sw / 2, sh);
+    ctx.fillStyle = app.hoverMoon ? '#fef08a' : '#f97316';
+    ctx.font = `bold ${Math.max(10, Math.floor(mr * 0.22))}px sans-serif`;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    if (siloOpen < 0.25) ctx.fillText('☢', 0, 1);
+    ctx.restore();
+
+    // Kuusimetsän siluetit (2 kerrosta)
+    const groundY = H * 0.84;
+    [
+      { col: '#0b172c', hMin: 95, hVar: 55, step: 42, yOff: 12 },
+      { col: '#060d1c', hMin: 125, hVar: 75, step: 56, yOff: 0 }
+    ].forEach((layer, li) => {
+      ctx.fillStyle = layer.col;
+      ctx.beginPath(); ctx.moveTo(0, H);
+      for (let x = -20; x <= W + 40; x += layer.step) {
+        const th = layer.hMin + Math.abs(Math.sin(x * 0.031 + li * 2)) * layer.hVar;
+        ctx.lineTo(x, groundY + layer.yOff);
+        ctx.lineTo(x + layer.step * 0.5, groundY + layer.yOff - th);
+      }
+      ctx.lineTo(W + 40, H); ctx.closePath(); ctx.fill();
+    });
+
+    // Maanpinta
+    const gg = ctx.createLinearGradient(0, groundY - 10, 0, H);
+    gg.addColorStop(0, '#1e1b18'); gg.addColorStop(0.45, '#14110f'); gg.addColorStop(1, '#070606');
+    ctx.fillStyle = gg; ctx.fillRect(0, groundY - 8, W, H - groundY + 12);
+
+    // Kettu piirretään VAIN kun ollaan rauhassa päätilassa (EI koskaan tuhoanimaatioiden tai bunkkerievakuoinnin aikana!)
+    const showSurfaceFox = withFox && app.state === 'MAIN';
+    if (showSurfaceFox && foxBodyCanvas && foxHeadCanvas) {
+      const fSc = Math.min(W, H) / 760;
+      const fx = W * 0.5, fy = groundY - 125 * fSc;
+      const br = Math.sin(app.time * 1.9) * 3.5 * fSc;
+      ctx.save();
+      ctx.translate(fx, fy + br);
+      ctx.scale(fSc, fSc);
+      ctx.drawImage(foxBodyCanvas, -FOX_S / 2, -FOX_S / 2);
+      ctx.drawImage(foxHeadCanvas, -FOX_S / 2, -FOX_S / 2);
+      ctx.restore();
+      drawFoxEyes(fx, fy + br, fSc);
+    }
+
+    // Kiiltomadot
+    app.fireflies.forEach(f => {
+      f.x += f.vx * dt; f.y += f.vy * dt;
+      if (f.y < 0.35) { f.y = 0.92; f.x = Math.random(); }
+      if (f.x < 0) f.x = 1; if (f.x > 1) f.x = 0;
+      const a = 0.25 + 0.75 * (0.5 + 0.5 * Math.sin(app.time * 3.2 + f.ph));
+      ctx.fillStyle = `rgba(253, 224, 71, ${a})`;
+      ctx.beginPath(); ctx.arc(f.x * W, f.y * H, f.r, 0, Math.PI * 2); ctx.fill();
+    });
+  }
+
+  /* =====================================================================
+     6. KETUN MAANALAINEN HISSIEVAKUOINTI (Aina ennen tuhoa!) & BUNKKERIVIERAILU
+     ===================================================================== */
+  function beginShelterSequence(mode) {
+    app.pendingMode = mode;
+    app.state = 'FOX_SHELTER';
+    app.stateTime = 0;
+    showEl($('mainUI'), false);
+    showEl($('mapOverlay'), false);
+    showEl($('labOverlay'), false);
+    showEl($('bunkerOverlay'), false);
+    showEl($('parachuteMenuOverlay'), false);
+    showEl($('whaleOverlay'), false);
+    setTopActionsVisible(false);
+    $('moonTooltip').style.opacity = '0';
+    snd.playShelter();
+    setBanner(true, '🚨 KETTU EVAKUOIDIIN MAAN ALLE!', 'Hissi laskeutuu -180 m syvyyteen turvabunkkeriin ennen aseen laukaisua...');
+  }
+
+  function executeDestruction(mode) {
+    if (mode === 'nuke') startNukeNow();
+    else if (mode === 'blackhole') startBlackHoleNow();
+    else if (mode === 'sso') startSSONow();
+    else if (mode === 'elephant_portal') startElephantPortalNow();
+    else if (mode === 'elephant_dlc') startElephantDLCNow();
+    else if (mode === 'parachute_norm') startParachuteNormNow();
+    else if (mode === 'parachute_mega') startParachuteMegaNow();
+    else if (mode === 'parachute_ultra') startParachuteUltraNow();
+    else if (mode === 'parachute_bike') startParachuteBikeNow();
+    else if (mode === 'parachute_tsar') startParachuteTsarNow();
+  }
+
+  function drawFoxShelter(dt) {
+    const dur = 3.6;
+    const t = Math.min(1, app.stateTime / dur);
+    const hatchOpen = t < 0.2 ? t / 0.2 : (t > 0.78 ? Math.max(0, 1 - (t - 0.78) / 0.14) : 1);
+    const descP = Math.max(0, Math.min(1, (t - 0.16) / 0.6));
+    const ease = descP < 0.5 ? 2 * descP * descP : 1 - Math.pow(-2 * descP + 2, 2) / 2;
+
+    // Kamera seuraa hissiä alaspäin ("maa venyy" -180 m syvyyteen!)
+    const maxDepthPx = H * 1.45;
+    const camY = ease * maxDepthPx;
+    const surfaceY = H * 0.72 - camY;
+    const bunkY = surfaceY + maxDepthPx;
+    const cx = W * 0.5;
+
+    // Ylätaivas näkyy jos pinta on ruudussa
+    if (surfaceY > -40) {
+      const sky = ctx.createLinearGradient(0, Math.min(0, surfaceY - H), 0, surfaceY);
+      sky.addColorStop(0, '#020617'); sky.addColorStop(1, '#16284d');
+      ctx.fillStyle = sky; ctx.fillRect(0, 0, W, Math.max(0, surfaceY));
+      app.stars.forEach(s => {
+        const sy = s.y * H * 0.7 - camY * 0.6;
+        if (sy > 0 && sy < surfaceY) {
+          ctx.fillStyle = 'rgba(226,232,240,0.7)';
+          ctx.beginPath(); ctx.arc(s.x * W, sy, s.r, 0, Math.PI * 2); ctx.fill();
+        }
+      });
+    }
+
+    // Venyvä maakerros: multa -> juuristot -> kristalliluolat -> peruskallio
+    const earthTop = Math.max(0, surfaceY);
+    const ug = ctx.createLinearGradient(0, surfaceY, 0, bunkY + H * 0.4);
+    ug.addColorStop(0, '#271a12');
+    ug.addColorStop(0.28, '#1c1524');
+    ug.addColorStop(0.65, '#0f172a');
+    ug.addColorStop(1, '#040712');
+    ctx.fillStyle = ug;
+    ctx.fillRect(0, earthTop, W, H - earthTop + 4);
+
+    // Kalliokerrosten juovat & hohtavat kristallit maan alla
+    for (let i = 1; i <= 10; i++) {
+      const ly = surfaceY + i * (maxDepthPx / 9);
+      if (ly < -30 || ly > H + 30) continue;
+      ctx.strokeStyle = i % 2 === 0 ? 'rgba(251,191,36,0.16)' : 'rgba(56,189,248,0.14)';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(0, ly); ctx.bezierCurveTo(W * 0.3, ly + 22, W * 0.7, ly - 22, W, ly + 10); ctx.stroke();
+    }
+    const crystCols = ['#38bdf8', '#c084fc', '#34d399', '#f472b6', '#fbbf24'];
+    for (let c = 0; c < 24; c++) {
+      const crx = ((c * 149) % Math.max(200, W - 80)) + 40;
+      const cry = surfaceY + 120 + (c / 24) * (maxDepthPx - 80);
+      if (Math.abs(crx - cx) < 120 || cry < -30 || cry > H + 30) continue;
+      const col = crystCols[c % crystCols.length];
+      ctx.save(); ctx.globalAlpha = 0.72; ctx.fillStyle = col;
+      ctx.beginPath(); ctx.moveTo(crx, cry - 18); ctx.lineTo(crx + 8, cry); ctx.lineTo(crx, cry + 10); ctx.lineTo(crx - 8, cry); ctx.closePath(); ctx.fill();
+      ctx.restore();
+    }
+
+    // Valaistu hissikuilu
+    const shaftW = 154;
+    ctx.fillStyle = '#070d1c'; ctx.strokeStyle = '#64748b'; ctx.lineWidth = 3;
+    ctx.fillRect(cx - shaftW / 2, surfaceY, shaftW, maxDepthPx + 40);
+    ctx.strokeRect(cx - shaftW / 2, surfaceY, shaftW, maxDepthPx + 40);
+    for (let ly = surfaceY + 36; ly < bunkY - 40; ly += 64) {
+      if (ly < -10 || ly > H + 10) continue;
+      ctx.fillStyle = 'rgba(56,189,248,0.75)';
+      ctx.fillRect(cx - shaftW / 2 + 8, ly, 8, 20);
+      ctx.fillRect(cx + shaftW / 2 - 16, ly, 8, 20);
+    }
+
+    // Bunkkerihuone pohjalla
+    const bunkW = Math.min(W * 0.86, 620), bunkH = 260;
+    const roomG = ctx.createRadialGradient(cx, bunkY, 20, cx, bunkY, bunkW * 0.65);
+    roomG.addColorStop(0, '#361f14'); roomG.addColorStop(0.6, '#141d30'); roomG.addColorStop(1, '#080e1c');
+    ctx.fillStyle = roomG; ctx.strokeStyle = t > 0.78 ? '#6ee7b7' : '#f59e0b'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.roundRect(cx - bunkW / 2, bunkY - bunkH / 2, bunkW, bunkH, 28); ctx.fill(); ctx.stroke();
+
+    // Takka vasemmalla bunkkerissa
+    const fpX = cx - bunkW * 0.32, fpY = bunkY + 12;
+    ctx.fillStyle = '#334155'; ctx.beginPath(); ctx.roundRect(fpX - 36, fpY, 72, 68, [14, 14, 4, 4]); ctx.fill();
+    const fg = ctx.createRadialGradient(fpX, fpY + 56, 3, fpX, fpY + 46, 36);
+    fg.addColorStop(0, '#fef08a'); fg.addColorStop(0.5, '#f97316'); fg.addColorStop(1, 'rgba(239,68,68,0)');
+    ctx.fillStyle = fg; ctx.beginPath(); ctx.ellipse(fpX, fpY + 48, 22, 26 + Math.sin(app.time * 16) * 5, 0, 0, Math.PI * 2); ctx.fill();
+
+    // Lasi-teräshissi + Kettu hissikorin sisällä (AINOA KETTU!)
+    const elevY = surfaceY + 45 + ease * (bunkY - surfaceY - 35);
+    // Kaapeli
+    ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(cx, surfaceY); ctx.lineTo(cx, elevY - 65); ctx.stroke();
+    // Hissikori
+    ctx.fillStyle = 'rgba(30,41,59,0.82)'; ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.roundRect(cx - 64, elevY - 68, 128, 128, 14); ctx.fill(); ctx.stroke();
+    if (foxBodyCanvas && foxHeadCanvas) {
+      const fSc = 0.24;
+      ctx.save(); ctx.translate(cx, elevY - 6); ctx.scale(fSc, fSc);
+      ctx.drawImage(foxBodyCanvas, -FOX_S / 2, -FOX_S / 2);
+      ctx.drawImage(foxHeadCanvas, -FOX_S / 2, -FOX_S / 2);
+      ctx.restore();
+    }
+
+    // Panssariluukut maanpinnalla
+    if (surfaceY > -40 && surfaceY < H + 40) {
+      const lw = shaftW * 0.52;
+      const slide = lw * hatchOpen;
+      ctx.fillStyle = '#334155'; ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 2.5;
+      ctx.fillRect(cx - lw - slide, surfaceY - 12, lw, 16); ctx.strokeRect(cx - lw - slide, surfaceY - 12, lw, 16);
+      ctx.fillRect(cx + slide, surfaceY - 12, lw, 16); ctx.strokeRect(cx + slide, surfaceY - 12, lw, 16);
+    }
+
+    // Syvyysmittari ja suojakilven lukitus
+    const depthM = Math.round(ease * 180);
+    ctx.fillStyle = 'rgba(15,23,42,0.88)'; ctx.strokeStyle = t > 0.78 ? '#34d399' : '#38bdf8'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.roundRect(cx - 115, 22, 230, 36, 12); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = t > 0.78 ? '#6ee7b7' : '#e0f2fe'; ctx.font = 'bold 13px monospace'; ctx.textAlign = 'center';
+    ctx.fillText(t > 0.78 ? '🔒 KETTU TURVASSA (-180 m)!' : `🛗 HISSI LASKEUTUU: -${depthM} m`, cx, 45);
+
+    if (t > 0.78) {
+      const shA = Math.min(1, (t - 0.78) / 0.16);
+      ctx.save(); ctx.globalAlpha = shA;
+      const sg = ctx.createRadialGradient(cx, bunkY, bunkW * 0.25, cx, bunkY, bunkW * 0.65);
+      sg.addColorStop(0, 'rgba(52,211,153,0)'); sg.addColorStop(0.8, 'rgba(16,185,129,0.22)'); sg.addColorStop(1, 'rgba(110,231,183,0.65)');
+      ctx.fillStyle = sg; ctx.beginPath(); ctx.ellipse(cx, bunkY, bunkW * 0.56, bunkH * 0.68, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#6ee7b7'; ctx.lineWidth = 3; ctx.stroke();
+      ctx.restore();
+    }
+
+    if (t >= 1) executeDestruction(app.pendingMode || 'nuke');
+  }
+
+  function openBunkerVisit() {
+    app.state = 'BUNKER_VISIT';
+    app.stateTime = 0;
+    app.bunkerFireBoost = 0;
+    app.bunkerShieldTest = 0;
+    app.bunkerHearts = [];
+    showEl($('mainUI'), false); showEl($('mapOverlay'), false); showEl($('labOverlay'), false);
+    showEl($('whaleOverlay'), false); showEl($('parachuteMenuOverlay'), false);
+    setBanner(false); setTopActionsVisible(true); showEl($('bunkerOverlay'), true);
+    $('bunkerStatusText').textContent = 'Kettu rentoutuu syvällä kristalliluolien keskellä lämpimän takan ääressä!';
+    snd.tone('triangle', 260, 140, 0.7, 0.14, 0);
+  }
+
+  function drawBunkerVisit(dt) {
+    const descendT = Math.min(1, app.stateTime / 1.15);
+    const ease = descendT < 0.5 ? 2 * descendT * descendT : 1 - Math.pow(-2 * descendT + 2, 2) / 2;
+    if (app.bunkerFireBoost > 0) app.bunkerFireBoost = Math.max(0, app.bunkerFireBoost - dt * 0.45);
+    if (app.bunkerShieldTest > 0) app.bunkerShieldTest = Math.max(0, app.bunkerShieldTest - dt * 0.35);
+
+    const bg = ctx.createRadialGradient(W * 0.5, H * 0.48, 30, W * 0.5, H * 0.5, Math.max(W, H) * 0.85);
+    bg.addColorStop(0, '#1e162e'); bg.addColorStop(0.55, '#0d1324'); bg.addColorStop(1, '#040712');
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+    // Kalliokerrokset & kristallit
+    for (let i = 1; i <= 7; i++) {
+      const ly = H * (i / 8);
+      ctx.strokeStyle = i % 2 === 0 ? 'rgba(251,191,36,.16)' : 'rgba(56,189,248,.13)';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(0, ly); ctx.bezierCurveTo(W * 0.3, ly + 18, W * 0.7, ly - 18, W, ly + 8); ctx.stroke();
+    }
+    const crystCols = ['#38bdf8', '#c084fc', '#34d399', '#f472b6', '#fbbf24'];
+    for (let c = 0; c < 22; c++) {
+      const cx2 = ((c * 137) % Math.max(200, W - 60)) + 30;
+      const cy2 = ((c * 97) % Math.max(200, H - 120)) + 60;
+      const cr = 9 + (c % 4) * 5;
+      const col = crystCols[c % crystCols.length];
+      ctx.save(); ctx.globalAlpha = 0.3 + 0.25 * Math.sin(app.time * 2.8 + c);
+      const gl = ctx.createRadialGradient(cx2, cy2, 1, cx2, cy2, cr * 3);
+      gl.addColorStop(0, col); gl.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(cx2, cy2, cr * 3, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 0.82; ctx.fillStyle = col;
+      ctx.beginPath(); ctx.moveTo(cx2, cy2 - cr * 1.9); ctx.lineTo(cx2 + cr * 0.65, cy2); ctx.lineTo(cx2, cy2 + cr * 0.8); ctx.lineTo(cx2 - cr * 0.65, cy2); ctx.closePath(); ctx.fill();
+      ctx.restore();
+    }
+
+    const bx = W * 0.5, by = H * 0.5 + (1 - ease) * (-H * 0.35);
+    const bunkW = Math.min(W * 0.88, 680), bunkH = Math.min(H * 0.46, 290);
+
+    // Hissikuilu katosta
+    ctx.fillStyle = '#070d1c'; ctx.strokeStyle = '#64748b'; ctx.lineWidth = 3;
+    ctx.fillRect(bx - 72, 0, 144, Math.max(10, by - bunkH * 0.5 + 8));
+    ctx.strokeRect(bx - 72, 0, 144, Math.max(10, by - bunkH * 0.5 + 8));
+
+    // Bunkkerihuone
+    const roomG = ctx.createRadialGradient(bx, by, 25, bx, by, bunkW * 0.65);
+    roomG.addColorStop(0, app.bunkerFireBoost > 0 ? '#3f2213' : '#2a1a12');
+    roomG.addColorStop(0.6, '#141d30'); roomG.addColorStop(1, '#080e1c');
+    ctx.fillStyle = roomG; ctx.strokeStyle = app.bunkerShieldTest > 0 ? '#6ee7b7' : '#f59e0b'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.roundRect(bx - bunkW * 0.5, by - bunkH * 0.5, bunkW, bunkH, 30); ctx.fill(); ctx.stroke();
+
+    // Matto
+    ctx.fillStyle = 'rgba(180,83,9,.45)';
+    ctx.beginPath(); ctx.ellipse(bx, by + bunkH * 0.34, bunkW * 0.34, 24, 0, 0, Math.PI * 2); ctx.fill();
+
+    // Takka
+    const fpX = bx - bunkW * 0.32, fpY = by + bunkH * 0.05;
+    ctx.fillStyle = '#334155'; ctx.strokeStyle = '#64748b'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.roundRect(fpX - 42, fpY, 84, 78, [16, 16, 6, 6]); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#09090b'; ctx.beginPath(); ctx.arc(fpX, fpY + 74, 28, Math.PI, 0); ctx.fill();
+    const fireSc = 1 + app.bunkerFireBoost * 0.75;
+    const flH = (26 + Math.sin(app.time * 16) * 5) * fireSc;
+    const fg = ctx.createRadialGradient(fpX, fpY + 66, 3, fpX, fpY + 52, 42 * fireSc);
+    fg.addColorStop(0, '#fef08a'); fg.addColorStop(0.45, '#f97316'); fg.addColorStop(1, 'rgba(239,68,68,0)');
+    ctx.fillStyle = fg; ctx.beginPath(); ctx.ellipse(fpX, fpY + 56, 26 * fireSc, flH, 0, 0, Math.PI * 2); ctx.fill();
+    app.shelterEmbers.forEach(em => {
+      em.y = (em.y + em.vy * (1 + app.bunkerFireBoost) * dt) % 58;
+      ctx.fillStyle = 'rgba(253,224,71,.9)';
+      ctx.beginPath(); ctx.arc(fpX + em.x * 0.6 + Math.sin(app.time * 5 + em.ph) * 6, fpY + 64 - em.y, em.r, 0, Math.PI * 2); ctx.fill();
+    });
+
+    // Kaakao & valvontamonitori
+    const tbX = bx + bunkW * 0.31, tbY = by + bunkH * 0.24;
+    ctx.fillStyle = '#78350f'; ctx.fillRect(tbX - 38, tbY, 76, 10); ctx.fillRect(tbX - 28, tbY + 10, 8, 28); ctx.fillRect(tbX + 20, tbY + 10, 8, 28);
+    ctx.fillStyle = '#f8fafc'; ctx.beginPath(); ctx.roundRect(tbX - 11, tbY - 20, 22, 20, 5); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,255,255,.65)'; ctx.lineWidth = 1.8;
+    for (let s = 0; s < 3; s++) {
+      ctx.beginPath(); ctx.moveTo(tbX - 6 + s * 6, tbY - 24);
+      ctx.quadraticCurveTo(tbX - 9 + s * 6 + Math.sin(app.time * 4 + s) * 5, tbY - 38, tbX - 3 + s * 6, tbY - 50); ctx.stroke();
+    }
+    ctx.fillStyle = '#020617'; ctx.strokeStyle = '#34d399'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.roundRect(tbX - 52, by - bunkH * 0.32, 104, 52, 8); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#34d399'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
+    ctx.fillText('SYVYYS: -180m', tbX, by - bunkH * 0.32 + 21);
+    ctx.fillStyle = '#fde047';
+    ctx.fillText(app.bunkerShieldTest > 0 ? 'KILPI: MAX!' : 'TILA: TURVASSA', tbX, by - bunkH * 0.32 + 39);
+
+    // Kettu bunkkerissa
+    if (foxBodyCanvas && foxHeadCanvas) {
+      const fSc = Math.min(bunkW, bunkH) / 960;
+      const br = Math.sin(app.time * 1.8) * 3;
+      ctx.save(); ctx.translate(bx, by + bunkH * 0.06 + br); ctx.scale(fSc, fSc);
+      ctx.drawImage(foxBodyCanvas, -FOX_S / 2, -FOX_S / 2);
+      ctx.drawImage(foxHeadCanvas, -FOX_S / 2, -FOX_S / 2);
+      ctx.restore();
+      drawFoxEyes(bx, by + bunkH * 0.06 + br, fSc);
+    }
+
+    // Sydämet & liekit
+    for (let i = app.bunkerHearts.length - 1; i >= 0; i--) {
+      const h = app.bunkerHearts[i]; h.x += h.vx * dt; h.y += h.vy * dt; h.life -= dt * 0.65;
+      if (h.life <= 0) { app.bunkerHearts.splice(i, 1); continue; }
+      ctx.save(); ctx.globalAlpha = h.life; ctx.font = `${h.sz}px sans-serif`; ctx.textAlign = 'center'; ctx.fillText(h.em, h.x, h.y); ctx.restore();
+    }
+    if (app.bunkerShieldTest > 0) {
+      ctx.save(); ctx.globalAlpha = Math.min(1, app.bunkerShieldTest);
+      const shG = ctx.createRadialGradient(bx, by, bunkW * 0.25, bx, by, bunkW * 0.66);
+      shG.addColorStop(0, 'rgba(52,211,153,0)'); shG.addColorStop(0.78, 'rgba(16,185,129,.25)'); shG.addColorStop(1, 'rgba(110,231,183,.65)');
+      ctx.fillStyle = shG; ctx.beginPath(); ctx.ellipse(bx, by, bunkW * 0.58, bunkH * 0.7, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#6ee7b7'; ctx.lineWidth = 3.5; ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  /* =====================================================================
+     7. KARTTA & KARHUJEN SALAINEN LABORATORIO
+     ===================================================================== */
+  function openMapNow() {
+    if (!['MAIN', 'LAB', 'BUNKER_VISIT'].includes(app.state)) return;
+    app.state = 'MAP';
+    showEl($('mainUI'), false); showEl($('labOverlay'), false); showEl($('bunkerOverlay'), false);
+    showEl($('mapOverlay'), true); setTopActionsVisible(true);
+    handleResize();
+  }
+
+  function selectLocation(loc) {
+    app.selectedLoc = loc;
+    if (!loc) { $('locCard').classList.add('hidden'); return; }
+    $('locEmoji').textContent = loc.emoji;
+    $('locName').textContent = loc.name;
+    $('locSub').textContent = loc.sub;
+    $('locDesc').textContent = loc.desc;
+    $('locBunkerSection').classList.toggle('hidden', loc.id !== 'ketun-metsa');
+    $('locLabSection').classList.toggle('hidden', loc.id !== 'karhuvuoret');
+    $('locPortalSection').classList.toggle('hidden', loc.id !== 'pollokallio');
+    $('locDlcSection').classList.toggle('hidden', loc.id !== 'pollokallio');
+    $('locParachuteSection').classList.toggle('hidden', loc.id !== 'syvajarvi');
+    $('locCard').classList.remove('hidden');
+  }
+
+  function drawMapScene() {
+    const mw = mapCanvas.clientWidth || W, mh = mapCanvas.clientHeight || H;
+    mctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    mctx.fillStyle = '#071529'; mctx.fillRect(0, 0, mw, mh);
+
+    mctx.save();
+    mctx.translate(mw / 2, mh / 2);
+    mctx.scale(app.mapCam.zoom, app.mapCam.zoom);
+    mctx.translate(-app.mapCam.x, -app.mapCam.y);
+
+    // Mantereen muoto
+    const lg = mctx.createRadialGradient(800, 480, 120, 800, 500, 740);
+    lg.addColorStop(0, '#143b2c'); lg.addColorStop(0.55, '#0f2c27'); lg.addColorStop(1, '#0b1e29');
+    mctx.fillStyle = lg; mctx.strokeStyle = 'rgba(56,189,248,0.45)'; mctx.lineWidth = 6;
+    mctx.beginPath();
+    mctx.moveTo(220, 380); mctx.bezierCurveTo(320, 110, 780, 60, 1180, 140);
+    mctx.bezierCurveTo(1480, 210, 1520, 540, 1380, 790);
+    mctx.bezierCurveTo(1160, 950, 520, 950, 260, 820);
+    mctx.bezierCurveTo(110, 710, 120, 520, 220, 380);
+    mctx.closePath(); mctx.fill(); mctx.stroke();
+
+    // Syväjärvi
+    mctx.fillStyle = '#0c4a6e'; mctx.strokeStyle = 'rgba(125,211,252,0.5)'; mctx.lineWidth = 3;
+    mctx.beginPath(); mctx.ellipse(520, 690, 110, 65, -0.2, 0, Math.PI * 2); mctx.fill(); mctx.stroke();
+
+    // Yhteyspolut
+    mctx.strokeStyle = 'rgba(253,224,71,0.18)'; mctx.lineWidth = 3; mctx.setLineDash([10, 10]);
+    for (let i = 1; i < LOCATIONS.length; i++) {
+      mctx.beginPath(); mctx.moveTo(LOCATIONS[0].x, LOCATIONS[0].y); mctx.lineTo(LOCATIONS[i].x, LOCATIONS[i].y); mctx.stroke();
+    }
+    mctx.setLineDash([]);
+
+    // 14 kohdetta
+    LOCATIONS.forEach(loc => {
+      const sel = app.selectedLoc && app.selectedLoc.id === loc.id;
+      const pulse = 1 + Math.sin(app.time * 3 + loc.x * 0.01) * 0.1;
+      mctx.save(); mctx.translate(loc.x, loc.y);
+      const gg = mctx.createRadialGradient(0, 0, 5, 0, 0, sel ? 48 : 34);
+      gg.addColorStop(0, loc.col); gg.addColorStop(1, 'rgba(0,0,0,0)');
+      mctx.fillStyle = gg; mctx.beginPath(); mctx.arc(0, 0, (sel ? 48 : 34) * pulse, 0, Math.PI * 2); mctx.fill();
+
+      mctx.fillStyle = '#0f172a'; mctx.strokeStyle = sel ? '#fef08a' : loc.col; mctx.lineWidth = sel ? 4 : 2.5;
+      mctx.beginPath(); mctx.arc(0, 0, 22, 0, Math.PI * 2); mctx.fill(); mctx.stroke();
+      mctx.font = '20px sans-serif'; mctx.textAlign = 'center'; mctx.textBaseline = 'middle';
+      mctx.fillText(loc.emoji, 0, 2);
+
+      mctx.fillStyle = 'rgba(15,23,42,0.85)'; mctx.beginPath(); mctx.roundRect(-64, 27, 128, 22, 7); mctx.fill();
+      mctx.fillStyle = '#f8fafc'; mctx.font = 'bold 12px Inter, sans-serif';
+      mctx.fillText(loc.name, 0, 39);
+      mctx.restore();
+    });
+    mctx.restore();
+  }
+
+  function openLabNow() {
+    if (!app.hasKey) { app.hasKey = true; updateBadges(); }
+    app.state = 'LAB'; app.stateTime = 0; app.hoverLabGun = false;
+    showEl($('mainUI'), false); showEl($('mapOverlay'), false); showEl($('bunkerOverlay'), false);
+    showEl($('whaleOverlay'), false); showEl($('parachuteMenuOverlay'), false);
+    setBanner(false); setTopActionsVisible(true); showEl($('labOverlay'), true);
+    snd.tone('sine', 240, 480, 0.5, 0.12, 0);
+  }
+
+  function drawLabScene(dt) {
+    const bg = ctx.createRadialGradient(W * 0.5, H * 0.45, 40, W * 0.5, H * 0.5, Math.max(W, H) * 0.85);
+    bg.addColorStop(0, '#1e1b4b'); bg.addColorStop(0.55, '#0f172a'); bg.addColorStop(1, '#020617');
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+    // Koeputkikuplat
+    app.labBubbles.forEach(b => {
+      b.y -= (b.spd * dt) / H;
+      if (b.y < 0) { b.y = 1; b.x = Math.random(); }
+      ctx.fillStyle = `hsla(${b.hue},90%,65%,0.42)`;
+      ctx.beginPath(); ctx.arc(b.x * W, b.y * H, b.r, 0, Math.PI * 2); ctx.fill();
+    });
+
+    // Tiedekarhut sivuilla
+    [W * 0.22, W * 0.78].forEach((bx, i) => {
+      const by = H * 0.58 + Math.sin(app.time * 2.5 + i) * 6;
+      ctx.fillStyle = '#78350f'; ctx.beginPath(); ctx.arc(bx, by, 38, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(bx - 24, by - 28, 12, 0, Math.PI * 2); ctx.arc(bx + 24, by - 28, 12, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#f8fafc'; ctx.fillRect(bx - 32, by + 26, 64, 58); // labratakki
+      ctx.fillStyle = '#38bdf8'; ctx.fillRect(bx - 20, by - 10, 16, 10); ctx.fillRect(bx + 4, by - 10, 16, 10); // suojalasit
+    });
+
+    // Musta Aukko -ase keskellä
+    const gx = app.labGun.x, gy = app.labGun.y;
+    const pulse = 1 + Math.sin(app.time * 5) * 0.08;
+    const gl = ctx.createRadialGradient(gx, gy, 10, gx, gy, 110 * pulse);
+    gl.addColorStop(0, '#c084fc'); gl.addColorStop(0.45, 'rgba(168,85,247,0.45)'); gl.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(gx, gy, 110 * pulse, 0, Math.PI * 2); ctx.fill();
+
+    ctx.fillStyle = '#1e293b'; ctx.strokeStyle = app.hoverLabGun ? '#fde047' : '#a855f7'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.roundRect(gx - 78, gy - 26, 156, 52, 16); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#020617'; ctx.strokeStyle = '#fbbf24'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(gx, gy, 20, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  }
+
+  /* =====================================================================
+     8. TUHOTAVAT 1–4 + LISÄOSA
+     ===================================================================== */
+  function startNukeNow() {
+    app.state = 'LAUNCHING'; app.stateTime = 0; app.lastMode = 'nuke';
+    app.missile = { sx: app.moon.sx, sy: app.moon.sy, x: app.moon.sx, y: app.moon.sy, tx: W * 0.5, ty: H * 0.72, trail: [] };
+    app.expParts = []; app.shocks = []; app.cracks = [];
+    snd.playNuke();
+    setBanner(true, '☢️ KUUN YDINASE LAUKAISTU!', 'Kettu on turvassa bunkkerissa — ohjus syöksyy kohti metsää!');
+  }
+
+  function drawNukeSequence(dt) {
+    if (app.state === 'LAUNCHING') {
+      const t = Math.min(1, app.stateTime / 2.2);
+      drawMainScene(dt, false, Math.min(1, t * 3.5));
+      const mx = app.missile.sx + (app.missile.tx - app.missile.sx) * t * t;
+      const my = app.missile.sy + (app.missile.ty - app.missile.sy) * t * t;
+      app.missile.trail.push({ x: mx, y: my, a: 1 });
+      if (app.missile.trail.length > 35) app.missile.trail.shift();
+      ctx.save(); ctx.globalCompositeOperation = 'screen';
+      app.missile.trail.forEach(p => {
+        p.a -= dt * 1.4;
+        if (p.a > 0) {
+          ctx.fillStyle = `rgba(251,146,60,${p.a})`;
+          ctx.beginPath(); ctx.arc(p.x, p.y, 10 * p.a, 0, Math.PI * 2); ctx.fill();
+        }
+      });
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(mx, my, 10, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+      if (t >= 1) {
+        app.state = 'EXPLODING'; app.stateTime = 0; app.shake = 36; app.flash = 1;
+        app.shocks = [{ r: 10, maxR: Math.max(W, H) * 1.1, a: 1 }];
+        app.expParts = Array.from({ length: 85 }, () => {
+          const a = Math.random() * 6.28, spd = 90 + Math.random() * 340;
+          return { x: app.missile.tx, y: app.missile.ty, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd - 90, r: 4 + Math.random() * 9, hue: 15 + Math.random() * 40, a: 1 };
+        });
+        setBanner(true, '💥 VALTAVA YDINRÄJÄHDYS!', 'Kaksoisvälähdys, Wilsonin pilvirengas ja salamoiva sienipilvi!');
+      }
+      return;
+    }
+
+    drawMainScene(dt, false, 1);
+    const t = app.stateTime;
+    const ox = app.missile.tx, oy = app.missile.ty;
+    const stemH = Math.min(H * 0.56, t * 230);
+    const capR = Math.min(250, 45 + t * 95);
+
+    ctx.save(); ctx.globalCompositeOperation = 'screen';
+    const sg = ctx.createLinearGradient(ox, oy + 30, ox, oy - stemH);
+    sg.addColorStop(0, '#dc2626'); sg.addColorStop(0.6, '#f97316'); sg.addColorStop(1, '#fef08a');
+    ctx.fillStyle = sg; ctx.fillRect(ox - capR * 0.24, oy - stemH, capR * 0.48, stemH + 30);
+    const cg = ctx.createRadialGradient(ox, oy - stemH, 12, ox, oy - stemH, capR);
+    cg.addColorStop(0, '#ffffff'); cg.addColorStop(0.45, '#fde047'); cg.addColorStop(0.78, '#ea580c'); cg.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = cg; ctx.beginPath(); ctx.ellipse(ox, oy - stemH, capR * 1.25, capR * 0.62, 0, 0, Math.PI * 2); ctx.fill();
+
+    // Wilsonin pilvirengas
+    ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 6;
+    ctx.beginPath(); ctx.ellipse(ox, oy - stemH * 0.48, capR * 1.55, capR * 0.26, 0, 0, Math.PI * 2); ctx.stroke();
+
+    // Salamat sienipilvessä
+    if (Math.random() < 0.35) {
+      ctx.strokeStyle = '#fef08a'; ctx.lineWidth = 2.5;
+      let lx = ox + (Math.random() - 0.5) * capR, ly = oy - stemH;
+      ctx.beginPath(); ctx.moveTo(lx, ly);
+      for (let i = 0; i < 4; i++) { lx += (Math.random() - 0.5) * 45; ly += 34; ctx.lineTo(lx, ly); }
+      ctx.stroke();
+    }
+
+    app.expParts.forEach(p => {
+      p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 120 * dt; p.a -= dt * 0.35;
+      if (p.a > 0) {
+        ctx.fillStyle = `hsla(${p.hue},100%,65%,${p.a})`;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
+      }
+    });
+    ctx.restore();
+
+    if (app.flash > 0) {
+      app.flash = Math.max(0, app.flash - dt * 1.3);
+      ctx.fillStyle = `rgba(255,252,240,${app.flash})`; ctx.fillRect(0, 0, W, H);
+    }
+    if (t > 4.2) enterWhale(true, 'nuke');
+  }
+
+  function startBlackHoleNow() {
+    app.state = 'BLACKHOLE_SUCK'; app.stateTime = 0; app.lastMode = 'blackhole'; app.foundWay2 = true; updateBadges();
+    app.bhObjs = Array.from({ length: 24 }, (_, i) => ({
+      ang: (i / 24) * 6.28, dist: 160 + Math.random() * Math.max(W, H) * 0.5,
+      em: i % 4 === 0 ? '🐻' : (i % 4 === 1 ? '🧪' : (i % 4 === 2 ? '🌲' : '⭐')),
+      say: i % 4 === 0 ? ['OHO!', 'KÄÄK!', 'MUN KOKEET!'][i % 3] : ''
+    }));
+    snd.playBlackHole();
+    setBanner(true, '🕳️ MUSTA AUKKO -ASE LAUKESI!', 'Tiedekarhut ja koko laboratorio imeytyvät relativistiseen fotonikehään!');
+  }
+
+  function drawBlackHoleSequence(dt) {
+    const t = Math.min(1, app.stateTime / 5.2);
+    ctx.fillStyle = '#02040a'; ctx.fillRect(0, 0, W, H);
+    const cx = W * 0.5, cy = H * 0.5;
+    const bhR = 35 + t * Math.min(W, H) * 0.32;
+
+    // Relativistinen fotonikehä
+    ctx.save(); ctx.globalCompositeOperation = 'screen';
+    const rg = ctx.createRadialGradient(cx, cy, bhR * 0.85, cx, cy, bhR * 2.4);
+    rg.addColorStop(0, '#fef08a'); rg.addColorStop(0.25, '#f97316'); rg.addColorStop(0.55, '#9333ea'); rg.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = rg; ctx.beginPath(); ctx.arc(cx, cy, bhR * 2.4, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+
+    app.bhObjs.forEach(o => {
+      o.ang += dt * (2.2 + (1 - o.dist / 800) * 5);
+      o.dist = Math.max(10, o.dist - dt * (110 + t * 240));
+      const ox = cx + Math.cos(o.ang) * o.dist, oy = cy + Math.sin(o.ang) * o.dist;
+      const sc = Math.max(0.15, o.dist / 360);
+      ctx.save(); ctx.translate(ox, oy); ctx.scale(sc, sc);
+      ctx.font = '32px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(o.em, 0, 0);
+      if (o.say) { ctx.fillStyle = '#fde047'; ctx.font = 'bold 14px Inter'; ctx.fillText(o.say, 0, -28); }
+      ctx.restore();
+    });
+
+    ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(cx, cy, bhR, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#fde047'; ctx.lineWidth = 4; ctx.stroke();
+
+    if (t >= 1) enterWhale(true, 'blackhole');
+  }
+
+  function startSSONow() {
+    app.foundWay3 = true; updateBadges(); app.lastMode = 'sso';
+    if (app.ssoVideoUrl) {
+      const v = $('ssoVideoEl'); v.src = app.ssoVideoUrl;
+      showEl($('ssoVideoWrap'), true);
+      v.play().catch(() => {});
+      v.onended = () => { showEl($('ssoVideoWrap'), false); enterWhale(true, 'sso'); };
+      return;
+    }
+    app.state = 'SSO_SEQUENCE'; app.stateTime = 0; app.ssoSparks = [];
+    snd.playSSO();
+    setBanner(true, '🛰️ SSO-10 AVARUUSLASERKONE!', 'Kiertoradan plasma-lasersäde iskee suoraan planeettaan!');
+  }
+
+  function drawSSOSequence(dt) {
+    const t = Math.min(1, app.stateTime / 5.4);
+    ctx.fillStyle = '#020510'; ctx.fillRect(0, 0, W, H);
+    app.stars.forEach(s => {
+      ctx.fillStyle = 'rgba(226,232,240,0.75)';
+      ctx.beginPath(); ctx.arc(s.x * W, s.y * H * 1.4, s.r, 0, Math.PI * 2); ctx.fill();
+    });
+
+    // Maapallo alhaalla
+    const ex = W * 0.5, ey = H * 0.85, er = Math.min(W, H) * 0.36;
+    const eg = ctx.createRadialGradient(ex - er * 0.3, ey - er * 0.3, 20, ex, ey, er);
+    eg.addColorStop(0, '#38bdf8'); eg.addColorStop(0.55, '#1d4ed8'); eg.addColorStop(1, '#082f49');
+    ctx.fillStyle = eg; ctx.beginPath(); ctx.arc(ex, ey, er, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(125,211,252,0.55)'; ctx.lineWidth = 6; ctx.stroke();
+
+    // SSO-10 Avaruusasema ylhäällä
+    const sx = W * 0.5, sy = H * 0.18;
+    ctx.fillStyle = '#38bdf8'; ctx.fillRect(sx - 120, sy - 10, 75, 20); ctx.fillRect(sx + 45, sy - 10, 75, 20);
+    ctx.fillStyle = '#cbd5e1'; ctx.beginPath(); ctx.roundRect(sx - 38, sy - 18, 76, 36, 10); ctx.fill();
+    ctx.fillStyle = '#a855f7'; ctx.beginPath(); ctx.arc(sx, sy + 16, 12, 0, Math.PI * 2); ctx.fill();
+
+    // Lasersäde!
+    if (t > 0.32) {
+      const lp = Math.min(1, (t - 0.32) / 0.18);
+      const beamY = sy + 20 + (ey - er - sy - 10) * lp;
+      ctx.save(); ctx.globalCompositeOperation = 'screen';
+      ctx.strokeStyle = '#c084fc'; ctx.lineWidth = 34;
+      ctx.beginPath(); ctx.moveTo(sx, sy + 20); ctx.lineTo(sx, beamY); ctx.stroke();
+      ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 12;
+      ctx.beginPath(); ctx.moveTo(sx, sy + 20); ctx.lineTo(sx, beamY); ctx.stroke();
+      if (lp >= 1) {
+        app.shake = 22;
+        const br = (t - 0.5) * Math.max(W, H) * 1.4;
+        const bg = ctx.createRadialGradient(ex, ey - er + 10, 10, ex, ey - er + 10, Math.max(20, br));
+        bg.addColorStop(0, '#ffffff'); bg.addColorStop(0.4, '#e879f9'); bg.addColorStop(0.75, '#f97316'); bg.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = bg; ctx.beginPath(); ctx.arc(ex, ey - er + 10, Math.max(20, br), 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+    }
+    if (t >= 1) enterWhale(true, 'sso');
+  }
+
+  // Norsupiirto-apu
+  function drawElephantSingle(x, y, ang, sc = 1, col = '#94a3b8', gold = false) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.scale(sc, sc);
+    ctx.fillStyle = gold ? '#f59e0b' : col;
+    ctx.strokeStyle = gold ? '#fef08a' : '#1e293b'; ctx.lineWidth = 2;
+    // Korva
+    ctx.beginPath(); ctx.ellipse(-10, -4, 15, 20, -0.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    // Vartalo & pää
+    ctx.beginPath(); ctx.ellipse(-16, 8, 22, 17, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.beginPath(); ctx.arc(10, -2, 16, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    // Kärsä
+    ctx.lineWidth = 7; ctx.lineCap = 'round'; ctx.strokeStyle = gold ? '#fbbf24' : col;
+    ctx.beginPath(); ctx.moveTo(22, 0); ctx.quadraticCurveTo(36, 4, 34, 18); ctx.stroke();
+    // Syöksyhammas & silmä
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(18, 6); ctx.lineTo(30, 11); ctx.lineTo(20, 12); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#09090b'; ctx.beginPath(); ctx.arc(14, -6, 3, 0, Math.PI * 2); ctx.fill();
+    if (gold) {
+      ctx.fillStyle = '#fde047';
+      ctx.beginPath(); ctx.moveTo(0, -16); ctx.lineTo(4, -28); ctx.lineTo(10, -20); ctx.lineTo(16, -28); ctx.lineTo(20, -16); ctx.closePath(); ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function startElephantPortalNow() {
+    app.state = 'ELEPHANT_PORTAL'; app.stateTime = 0; app.lastMode = 'elephant_portal'; app.foundWay4 = true; updateBadges();
+    const shouts = ['TRÖÖT!', 'YDINNORSU!', 'KARHUT VAROKAA!', 'BOOOOM!'];
+    app.elephants = Array.from({ length: 10 }, (_, i) => ({
+      x: W * 0.5, y: H * 0.22, vx: (Math.random() - 0.5) * 380 || 160, vy: 80 + Math.random() * 160,
+      rot: 0, vrot: (Math.random() - 0.5) * 6, sc: 0.9 + (i % 3) * 0.22, say: shouts[i % shouts.length], nextShot: 0.8 + i * 0.35
+    }));
+    app.eleNukes = []; app.eleBooms = [];
+    app.eleBears = Array.from({ length: 6 }, (_, i) => ({ x: W * (0.15 + i * 0.14), y: H * 0.82, vx: (Math.random() - 0.5) * 140, vy: -180 - Math.random() * 140 }));
+    snd.playElephantPortal();
+    setBanner(true, '🐘 PÖLLÖKALLION NORSUPORTAALI!', 'Sekoilevat ydinnorsut syöksyvät portaalista pommittamaan Karhuvuoria!');
+  }
+
+  function drawElephantPortal(dt) {
+    const t = Math.min(1, app.stateTime / 8.0);
+    drawMainScene(dt, false, 0);
+    const px = W * 0.5, py = H * 0.22;
+    const pr = Math.min(130, app.stateTime * 140);
+
+    // Pyörivä portaali
+    ctx.save(); ctx.translate(px, py); ctx.rotate(app.time * 2.5);
+    const pg = ctx.createRadialGradient(0, 0, 10, 0, 0, pr);
+    pg.addColorStop(0, '#ffffff'); pg.addColorStop(0.35, '#22d3ee'); pg.addColorStop(0.7, '#9333ea'); pg.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = pg; ctx.beginPath(); ctx.arc(0, 0, pr, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#67e8f9'; ctx.lineWidth = 3; ctx.setLineDash([12, 8]);
+    ctx.beginPath(); ctx.arc(0, 0, pr * 0.85, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+
+    app.elephants.forEach(e => {
+      e.x += e.vx * dt; e.y += e.vy * dt; e.rot += e.vrot * dt;
+      if (e.x < 40 || e.x > W - 40) e.vx *= -1;
+      if (e.y < 60 || e.y > H * 0.78) e.vy *= -1;
+      drawElephantSingle(e.x, e.y, e.rot, e.sc);
+      ctx.fillStyle = '#fef08a'; ctx.font = 'bold 11px Inter'; ctx.textAlign = 'center'; ctx.fillText(e.say, e.x, e.y - 30);
+      e.nextShot -= dt;
+      if (e.nextShot <= 0 && t < 0.78) {
+        e.nextShot = 1.4;
+        app.eleBooms.push({ x: W * (0.15 + Math.random() * 0.7), y: H * (0.65 + Math.random() * 0.2), r: 10, a: 1 });
+        app.shake = 18;
+      }
+    });
+
+    app.eleBears.forEach(b => {
+      b.x += b.vx * dt; b.y += b.vy * dt; b.vy += 260 * dt;
+      if (b.y > H * 0.85) { b.y = H * 0.85; b.vy = -210 - Math.random() * 140; }
+      ctx.font = '32px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('🐻', b.x, b.y);
+    });
+
+    ctx.save(); ctx.globalCompositeOperation = 'screen';
+    for (let i = app.eleBooms.length - 1; i >= 0; i--) {
+      const bo = app.eleBooms[i]; bo.r += 240 * dt; bo.a -= dt * 1.1;
+      if (bo.a <= 0) { app.eleBooms.splice(i, 1); continue; }
+      const g = ctx.createRadialGradient(bo.x, bo.y, 4, bo.x, bo.y, bo.r);
+      g.addColorStop(0, `rgba(255,255,240,${bo.a})`); g.addColorStop(0.5, `rgba(249,115,22,${bo.a * 0.8})`); g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(bo.x, bo.y, bo.r, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+
+    if (t > 0.82) {
+      const ft = (t - 0.82) / 0.18;
+      ctx.fillStyle = `rgba(255,250,235,${ft})`; ctx.fillRect(0, 0, W, H);
+    }
+    if (t >= 1) enterWhale(true, 'elephant_portal');
+  }
+
+  function startElephantDLCNow() {
+    app.state = 'ELEPHANT_DLC'; app.stateTime = 0; app.lastMode = 'elephant_dlc'; app.foundWay5 = true; updateBadges();
+    app.dlcDestroyed = 0; app.dlcNextIdx = 0; app.dlcCraters = []; app.dlcBooms = []; app.dlcAnimals = [];
+    app.dlcElephants = Array.from({ length: 16 }, (_, i) => ({
+      x: W * (i % 3 === 0 ? 0.5 : (i % 3 === 1 ? 0.12 : 0.88)), y: H * (i % 3 === 0 ? 0.14 : 0.45),
+      vx: (Math.random() - 0.5) * 320 || 140, vy: (Math.random() - 0.5) * 240 || 110, sc: 0.72 + (i % 3) * 0.18
+    }));
+    snd.playElephantDLC();
+    setBanner(true, '🔥 LISÄOSA: NORSUT TUHOAVAT KOKO KARTAN!', '16 norsun armeija ja Kultainen Keisarinorsu räjäyttävät kaikki 14 aluetta!');
+  }
+
+  function drawElephantDLC(dt) {
+    const t = Math.min(1, app.stateTime / 14.2);
+    ctx.fillStyle = '#071529'; ctx.fillRect(0, 0, W, H);
+    const sc = Math.min((W * 0.92) / MAP_W, (H * 0.84) / MAP_H);
+    const ox = (W - MAP_W * sc) * 0.5, oy = (H - MAP_H * sc) * 0.5;
+
+    // Kartta taustalla
+    ctx.save(); ctx.translate(ox, oy); ctx.scale(sc, sc);
+    ctx.fillStyle = '#123326'; ctx.strokeStyle = 'rgba(56,189,248,0.45)'; ctx.lineWidth = 6;
+    ctx.beginPath(); ctx.roundRect(140, 100, 1320, 810, 180); ctx.fill(); ctx.stroke();
+
+    LOCATIONS.forEach((loc, idx) => {
+      const dead = idx < app.dlcDestroyed;
+      ctx.fillStyle = dead ? '#dc2626' : '#0f172a';
+      ctx.strokeStyle = dead ? '#fde047' : loc.col; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.arc(loc.x, loc.y, dead ? 28 : 22, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.font = '22px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(dead ? '💥' : loc.emoji, loc.x, loc.y + 1);
+    });
+    ctx.restore();
+
+    // Tuhotaan alueet yksi kerrallaan!
+    const targetCount = Math.min(14, Math.floor(Math.max(0, app.stateTime - 1.6) / 0.65));
+    while (app.dlcDestroyed < targetCount) {
+      const loc = LOCATIONS[app.dlcDestroyed];
+      const lx = ox + loc.x * sc, ly = oy + loc.y * sc;
+      app.dlcBooms.push({ x: lx, y: ly, r: 12, a: 1 });
+      app.dlcAnimals.push({ x: lx, y: ly, vx: (Math.random() - 0.5) * 260, vy: -180 - Math.random() * 140, em: loc.emoji });
+      app.dlcDestroyed++;
+      app.shake = 18;
+    }
+
+    // Live-laskuri ylhäällä
+    ctx.fillStyle = 'rgba(15,23,42,0.9)'; ctx.strokeStyle = '#f97316'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.roundRect(W * 0.5 - 140, 20, 280, 38, 12); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#fde047'; ctx.font = 'bold 14px monospace'; ctx.textAlign = 'center';
+    ctx.fillText(`🔥 ALUEITA JÄLJELLÄ: ${14 - app.dlcDestroyed} / 14`, W * 0.5, 44);
+
+    app.dlcElephants.forEach(e => {
+      e.x += e.vx * dt; e.y += e.vy * dt;
+      if (e.x < 30 || e.x > W - 30) e.vx *= -1;
+      if (e.y < 60 || e.y > H - 60) e.vy *= -1;
+      drawElephantSingle(e.x, e.y, Math.sin(app.time * 5) * 0.25, e.sc);
+    });
+
+    app.dlcAnimals.forEach(a => {
+      a.x += a.vx * dt; a.y += a.vy * dt; a.vy += 240 * dt;
+      ctx.font = '26px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(a.em, a.x, a.y);
+    });
+
+    // Kultainen Keisarinorsu lopussa!
+    if (t > 0.78) {
+      const kt = (t - 0.78) / 0.22;
+      drawElephantSingle(W * 0.5, H * 0.5, Math.sin(app.time * 8) * 0.15, 2.2 + kt * 1.4, '#f59e0b', true);
+      if (kt > 0.55) {
+        ctx.fillStyle = `rgba(255,248,220,${(kt - 0.55) / 0.45})`; ctx.fillRect(0, 0, W, H);
+      }
+    }
+
+    ctx.save(); ctx.globalCompositeOperation = 'screen';
+    for (let i = app.dlcBooms.length - 1; i >= 0; i--) {
+      const bo = app.dlcBooms[i]; bo.r += 220 * dt; bo.a -= dt * 1.1;
+      if (bo.a <= 0) { app.dlcBooms.splice(i, 1); continue; }
+      const g = ctx.createRadialGradient(bo.x, bo.y, 4, bo.x, bo.y, bo.r);
+      g.addColorStop(0, `rgba(255,255,230,${bo.a})`); g.addColorStop(0.5, `rgba(249,115,22,${bo.a * 0.8})`); g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(bo.x, bo.y, bo.r, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+
+    if (t >= 1) enterWhale(true, 'elephant_dlc');
+  }
+
+  /* =====================================================================
+     9. HYLKEET & NORSUT — KAIKKI 5 VAIHTOEHTOA (Normi, MEGA, Hulluin, Pyörät 20s, Jättiautot & Tsar Bomba!)
+     ===================================================================== */
+  function initParachuteCommon(mode) {
+    app.stateTime = 0; app.shake = mode === 'norm' ? 6 : 10; app.flash = 0;
+    app.paraBombs = []; app.paraBooms = []; app.paraUltraWhaleExploded = false; app.ultraShards = [];
+    app.paraBikeRiders = []; app.paraBikeProjs = [];
+    app.paraTsarCars = []; app.paraTsarBombs = []; app.paraTsarClouds = [];
+
+    const isBig = mode !== 'norm';
+    const pCnt = mode === 'mega' || mode === 'ultra' ? 7 : (mode === 'tsar' ? 5 : (mode === 'bike' ? 4 : 3));
+    app.paraPlanes = Array.from({ length: pCnt }, (_, i) => {
+      const dir = i % 2 === 0 ? 1 : -1;
+      return { x: dir > 0 ? -120 - i * 110 : W + 120 + i * 110, y: H * (0.11 + (i % 4) * 0.075), vx: dir * (isBig ? 360 + i * 40 : 210 + i * 25), sc: isBig ? 1.0 + (i % 3) * 0.14 : 0.9 };
+    });
+
+    const cols = ['#38bdf8', '#f472b6', '#fbbf24', '#34d399', '#a855f7', '#fb7185', '#22d3ee'];
+    const sSays = ['ARF-ARF!!', 'HYLJEHYPPY!', 'NORPPA TULEE!', 'POMMI PUTOAA!'];
+    const eSays = ['TRÖÖÖÖT!', 'YDINNORSU!', 'LASKUVARJO!', 'BOOM!'];
+    const jCnt = mode === 'ultra' ? 14 : (mode === 'mega' ? 12 : (mode === 'tsar' ? 10 : (mode === 'bike' ? 8 : 9)));
+    app.paraJumpers = Array.from({ length: jCnt }, (_, i) => {
+      const isSeal = i % 2 === 0;
+      return {
+        x: W * (0.12 + ((i + 0.5) / jCnt) * 0.76), y: H * (0.12 + (i % 3) * 0.06),
+        vx: (Math.random() - 0.5) * 44, vy: 64 + Math.random() * 48, sway: Math.random() * 6.28,
+        canopyCol: cols[i % cols.length], isSeal, say: isSeal ? sSays[i % sSays.length] : eSays[i % eSays.length],
+        dropAt: 0.04 + (i / jCnt) * 0.28, dropped: false
+      };
+    });
+  }
+
+  function startParachuteNormNow() {
+    app.state = 'PARACHUTE_NORM'; app.foundWay6 = true; app.lastMode = 'PARACHUTE_NORM'; updateBadges();
+    initParachuteCommon('norm'); snd.playParachute('norm');
+    setBanner(true, '🪂 HYLKEET & NORSUT LASKUVARJOILLA!', 'Hylkeet ja norsut hyppäävät lentokoneista ja räjäyttävät kaiken!');
+  }
+  function startParachuteMegaNow() {
+    app.state = 'PARACHUTE_MEGA'; app.foundWay6Mega = true; app.lastMode = 'PARACHUTE_MEGA'; updateBadges();
+    initParachuteCommon('mega'); snd.playParachute('mega');
+    setBanner(true, '✈️💥 MEGA: YLIÄÄNIHÄVITTÄJÄT!', 'Jälkipolttimet, sateenkaarivanat ja superkaunis tähtisupernova!');
+  }
+  function startParachuteUltraNow() {
+    app.state = 'PARACHUTE_ULTRA'; app.foundWay6Ultra = true; app.lastMode = 'PARACHUTE_ULTRA'; updateBadges();
+    initParachuteCommon('ultra'); snd.playParachute('ultra');
+    setBanner(true, '🌌🔥 HULLUIN TILA: VALASKIN RÄJÄHTÄÄ!', 'Hylkeet ja norsut räjäyttävät itse Kosmisen Valaan — ja Valas palaa raivoissaan!');
+  }
+  function startParachuteBikeNow() {
+    app.state = 'PARACHUTE_BIKE'; app.foundWay6Bike = true; app.lastMode = 'PARACHUTE_BIKE'; updateBadges();
+    initParachuteCommon('bike');
+    const nCols = ['#34d399', '#38bdf8', '#f472b6', '#fde047', '#c084fc', '#fb923c'];
+    const bShouts = ['KILIKILII!', 'NEONPYÖRÄ!', 'VOLTTI!!', 'VALAS VAROKAA!', 'TRÖÖT-PYÖRÄ!', '20S KAAOS!'];
+    app.paraBikeRiders = Array.from({ length: 12 }, (_, i) => ({
+      x: (i % 2 === 0 ? -80 : W + 80) + (i % 2 === 0 ? -1 : 1) * (i % 6) * 140,
+      y: H * (0.24 + (i % 6) * 0.11), dir: i % 2 === 0 ? 1 : -1, spd: 230 + (i % 4) * 55,
+      sc: 0.78 + (i % 3) * 0.16, flip: 0, col: nCols[i % nCols.length], shout: bShouts[i % bShouts.length], nextShot: 0.8 + (i % 5) * 0.4
+    }));
+    snd.playParachute('bike');
+    setBanner(true, '🚲🐋 POLKUPYÖRÄNORSUT (20 s SPEKTAAKKELI!)', 'Norsut ajavat neonpyörillä, tekevät voltteja ja räjäyttävät itse Kosmisen Valaan!');
+  }
+  function startParachuteTsarNow() {
+    app.state = 'PARACHUTE_TSAR'; app.foundWay6Tsar = true; app.lastMode = 'PARACHUTE_TSAR'; updateBadges();
+    initParachuteCommon('tsar');
+    const cCols = ['#ef4444', '#f59e0b', '#a855f7', '#06b6d4', '#ec4899', '#22c55e'];
+    const cShouts = ['TSAR BOMBA!!', 'JÄTTIAUTO!', 'MEGA-BOOM!!', 'VALAS VARO!', 'TÄYSI KAASU!', 'TRÖÖÖT-TSAR!'];
+    app.paraTsarCars = Array.from({ length: 6 }, (_, i) => ({
+      x: (i % 2 === 0 ? -140 : W + 140) + (i % 2 === 0 ? -1 : 1) * i * 160,
+      y: H * (0.72 + (i % 3) * 0.065), dir: i % 2 === 0 ? 1 : -1, spd: 210 + (i % 3) * 65,
+      sc: 0.95 + (i % 3) * 0.18, col: cCols[i % cCols.length], shout: cShouts[i % cShouts.length], nextLaunch: 0.55 + i * 0.45, bouncePh: i * 1.1
+    }));
+    snd.playParachute('tsar');
+    setBanner(true, '🚗☢️ JÄTTIAUTOT & TSAR BOMBA!', 'Norsut kaahaavat jättiautoilla, räjäyttävät Tsar Bomba -pommeja ja raivostuttavat Valaan!');
+  }
+
+  function drawJet(x, y, dir, sc, col, mega) {
+    ctx.save(); ctx.translate(x, y); ctx.scale(dir * sc, sc);
+    if (mega) {
+      ctx.save(); ctx.globalCompositeOperation = 'screen';
+      const g = ctx.createLinearGradient(-25, 0, -165, 0);
+      g.addColorStop(0, '#fef08a'); g.addColorStop(0.35, '#ec4899'); g.addColorStop(0.7, '#38bdf8'); g.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(-22, -7); ctx.lineTo(-165, -2); ctx.lineTo(-165, 2); ctx.lineTo(-22, 7); ctx.closePath(); ctx.fill();
+      ctx.restore();
+    }
+    ctx.fillStyle = col; ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(36, 0); ctx.lineTo(-18, -14); ctx.lineTo(-28, -4); ctx.lineTo(-28, 4); ctx.lineTo(-18, 14); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#0ea5e9'; ctx.beginPath(); ctx.ellipse(10, -2, 10, 4, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
+
+  function drawJumper(jm) {
+    const sx = Math.sin(jm.sway) * 14;
+    ctx.save(); ctx.translate(jm.x + sx, jm.y);
+    // Laskuvarjo
+    ctx.fillStyle = jm.canopyCol; ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(0, -34, 24, Math.PI, 0); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,0.75)'; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.moveTo(-22, -34); ctx.lineTo(-5, -6); ctx.moveTo(22, -34); ctx.lineTo(5, -6); ctx.moveTo(0, -34); ctx.lineTo(0, -6); ctx.stroke();
+    if (jm.isSeal) {
+      ctx.font = '26px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('🦭', 0, 12);
+    } else {
+      drawElephantSingle(0, 6, Math.sin(jm.sway) * 0.2, 0.55);
+    }
+    ctx.fillStyle = '#fef08a'; ctx.font = 'bold 10px Inter'; ctx.textAlign = 'center'; ctx.fillText(jm.say, 0, -64);
+    ctx.restore();
+  }
+
+  function drawTsarBomba(x, y, ang, sc = 1) {
+    ctx.save(); ctx.translate(x, y); ctx.rotate(ang); ctx.scale(sc, sc);
+    ctx.save(); ctx.globalCompositeOperation = 'screen';
+    const gl = ctx.createRadialGradient(0, 0, 2, 0, 0, 30);
+    gl.addColorStop(0, 'rgba(254,240,138,.85)'); gl.addColorStop(0.5, 'rgba(239,68,68,.45)'); gl.addColorStop(1, 'rgba(239,68,68,0)');
+    ctx.fillStyle = gl; ctx.beginPath(); ctx.arc(0, 0, 30, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#fde047'; ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.ellipse(0, 0, 22, 10, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#dc2626'; ctx.beginPath(); ctx.arc(14, 0, 7, -Math.PI * 0.5, Math.PI * 0.5); ctx.fill();
+    ctx.fillStyle = '#facc15'; ctx.fillRect(-6, -9, 8, 18);
+    ctx.fillStyle = '#475569';
+    ctx.beginPath(); ctx.moveTo(-18, -6); ctx.lineTo(-27, -13); ctx.lineTo(-24, 0); ctx.lineTo(-27, 13); ctx.lineTo(-18, 6); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#09090b'; ctx.font = 'bold 8px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('☢', -2, 0.5);
+    ctx.restore();
+  }
+
+  function drawMonsterCarElephant(car, dt) {
+    car.x += car.dir * car.spd * dt;
+    if (car.dir > 0 && car.x > W + 190) car.x = -190;
+    if (car.dir < 0 && car.x < -190) car.x = W + 190;
+    const bounce = Math.abs(Math.sin(app.time * 9 + car.bouncePh)) * 10;
+    const cy = car.y - bounce;
+
+    ctx.save(); ctx.translate(car.x, cy); ctx.scale(car.dir * car.sc, car.sc);
+    ctx.save(); ctx.globalCompositeOperation = 'screen';
+    const ug = ctx.createRadialGradient(0, 26, 5, 0, 26, 68);
+    ug.addColorStop(0, car.col); ug.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = ug; ctx.beginPath(); ctx.ellipse(0, 28, 68, 18, 0, 0, Math.PI * 2); ctx.fill();
+    const hl = ctx.createLinearGradient(44, -4, 155, 8);
+    hl.addColorStop(0, 'rgba(254,249,195,.75)'); hl.addColorStop(1, 'rgba(254,249,195,0)');
+    ctx.fillStyle = hl; ctx.beginPath(); ctx.moveTo(46, -6); ctx.lineTo(155, -24); ctx.lineTo(155, 22); ctx.lineTo(46, 4); ctx.closePath(); ctx.fill();
+    const fl = 22 + Math.sin(app.time * 36 + car.bouncePh) * 10;
+    ctx.fillStyle = '#f97316'; ctx.beginPath(); ctx.moveTo(-48, -10); ctx.lineTo(-48 - fl, -18); ctx.lineTo(-48, -2); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#fef08a'; ctx.beginPath(); ctx.moveTo(-48, -9); ctx.lineTo(-48 - fl * 0.6, -15); ctx.lineTo(-48, -4); ctx.closePath(); ctx.fill();
+    ctx.restore();
+
+    ctx.fillStyle = car.col; ctx.strokeStyle = '#fef08a'; ctx.lineWidth = 2.2;
+    ctx.beginPath(); ctx.roundRect(-52, -22, 104, 30, 10); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#0f172a'; ctx.beginPath(); ctx.roundRect(-24, -44, 52, 24, [10, 14, 0, 0]); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = 'rgba(125,211,252,.6)'; ctx.fillRect(2, -40, 20, 15);
+    drawElephantSingle(-8, -48, -0.08, 0.58, '#cbd5e1');
+    drawTsarBomba(-30, -32, -0.18, 0.85);
+
+    [-32, 32].forEach(wx => {
+      ctx.fillStyle = '#09090b'; ctx.strokeStyle = '#94a3b8'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(wx, 18, 22, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fde047'; ctx.beginPath(); ctx.arc(wx, 18, 9, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2;
+      for (let s = 0; s < 4; s++) {
+        const a = app.time * 12 + s * Math.PI * 0.5;
+        ctx.beginPath(); ctx.moveTo(wx, 18); ctx.lineTo(wx + Math.cos(a) * 18, 18 + Math.sin(a) * 18); ctx.stroke();
+      }
+    });
+    ctx.restore();
+
+    ctx.fillStyle = 'rgba(15,23,42,.9)'; ctx.beginPath(); ctx.roundRect(car.x - 46, cy - 76 * car.sc, 92, 18, 6); ctx.fill();
+    ctx.fillStyle = '#fef08a'; ctx.font = 'bold 10px Inter'; ctx.textAlign = 'center'; ctx.fillText(car.shout, car.x, cy - 64 * car.sc);
+  }
+
+  function drawBikeElephant(r, dt) {
+    r.x += r.dir * r.spd * dt;
+    if (r.dir > 0 && r.x > W + 110) r.x = -110;
+    if (r.dir < 0 && r.x < -110) r.x = W + 110;
+    if (Math.random() < dt * 0.35 && r.flip <= 0) r.flip = 6.28;
+    if (r.flip > 0) r.flip = Math.max(0, r.flip - dt * 7);
+
+    const wy = r.y + Math.sin(app.time * 4 + r.x * 0.01) * 16;
+    ctx.save(); ctx.translate(r.x, wy); ctx.rotate(r.flip); ctx.scale(r.dir * r.sc, r.sc);
+    // Neon-pyörä
+    ctx.strokeStyle = r.col; ctx.lineWidth = 3.5;
+    [-24, 24].forEach(wx => {
+      ctx.beginPath(); ctx.arc(wx, 16, 16, 0, Math.PI * 2); ctx.stroke();
+      for (let s = 0; s < 3; s++) {
+        const a = app.time * 10 + s * 2.1;
+        ctx.beginPath(); ctx.moveTo(wx, 16); ctx.lineTo(wx + Math.cos(a) * 15, 16 + Math.sin(a) * 15); ctx.stroke();
+      }
+    });
+    ctx.beginPath(); ctx.moveTo(-24, 16); ctx.lineTo(0, -4); ctx.lineTo(24, 16); ctx.moveTo(0, -4); ctx.lineTo(14, -18); ctx.stroke();
+    drawElephantSingle(-2, -18, -0.1, 0.72, '#cbd5e1');
+    ctx.restore();
+    ctx.fillStyle = r.col; ctx.font = 'bold 10px Inter'; ctx.textAlign = 'center'; ctx.fillText(r.shout, r.x, wy - 44);
+  }
+
+  function drawCosmicWhale(dt, angry = false, sc = 1) {
+    const cx = W * 0.5, cy = H * 0.36 + Math.sin(app.time * 1.6) * 14;
+    ctx.save(); ctx.translate(cx, cy); ctx.scale(sc, sc);
+    // Hohtava kosminen aura
+    const ag = ctx.createRadialGradient(0, 0, 30, 0, 0, 230);
+    ag.addColorStop(0, angry ? 'rgba(239,68,68,0.45)' : 'rgba(56,189,248,0.38)');
+    ag.addColorStop(0.55, angry ? 'rgba(249,115,22,0.22)' : 'rgba(139,92,246,0.2)');
+    ag.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = ag; ctx.beginPath(); ctx.arc(0, 0, 230, 0, Math.PI * 2); ctx.fill();
+
+    // Valaan runko
+    const bg = ctx.createLinearGradient(-150, -60, 160, 70);
+    bg.addColorStop(0, angry ? '#7f1d1d' : '#1e3a8a');
+    bg.addColorStop(0.5, angry ? '#b91c1c' : '#4338ca');
+    bg.addColorStop(1, angry ? '#ea580c' : '#0284c7');
+    ctx.fillStyle = bg; ctx.strokeStyle = angry ? '#fef08a' : '#7dd3fc'; ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(-140, 10);
+    ctx.bezierCurveTo(-130, -82, 55, -92, 130, -15);
+    ctx.bezierCurveTo(165, 18, 195, -24, 210, -45);
+    ctx.bezierCurveTo(205, 8, 195, 34, 212, 56);
+    ctx.bezierCurveTo(175, 42, 145, 25, 115, 36);
+    ctx.bezierCurveTo(35, 76, -125, 68, -140, 10);
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+
+    // Tähtipilkut selässä
+    ctx.fillStyle = 'rgba(255,255,255,0.75)';
+    [[-65, -28, 3], [-15, -40, 2.5], [35, -25, 3.5], [75, -8, 2.5], [-30, -10, 2]].forEach(([sx, sy, sr]) => {
+      ctx.beginPath(); ctx.arc(sx, sy, sr, 0, Math.PI * 2); ctx.fill();
+    });
+
+    // Silmä
+    ctx.fillStyle = angry ? '#fef08a' : '#e0f2fe';
+    ctx.beginPath(); ctx.arc(-88, -6, 11, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = angry ? '#dc2626' : '#020617';
+    ctx.beginPath(); ctx.arc(-90, -6, 5.5, 0, Math.PI * 2); ctx.fill();
+    if (angry) {
+      ctx.strokeStyle = '#fef08a'; ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.moveTo(-104, -22); ctx.lineTo(-74, -12); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawParachuteModes(dt) {
+    const isMega = app.state === 'PARACHUTE_MEGA';
+    const isUltra = app.state === 'PARACHUTE_ULTRA';
+    const isBike = app.state === 'PARACHUTE_BIKE';
+    const isTsar = app.state === 'PARACHUTE_TSAR';
+    const dur = isBike ? 20.0 : (isTsar ? 14.5 : (isUltra ? 10.6 : (isMega ? 8.4 : 7.4)));
+    const t = Math.min(1, app.stateTime / dur);
+
+    if (isUltra || isBike || isTsar) {
+      const bg = ctx.createRadialGradient(W * 0.5, H * 0.36, 30, W * 0.5, H * 0.5, Math.max(W, H) * 0.9);
+      bg.addColorStop(0, isTsar ? '#2d0a12' : (isBike ? '#0b1936' : '#18092b'));
+      bg.addColorStop(0.55, '#050816'); bg.addColorStop(1, '#010208');
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+      app.stars.forEach(s => {
+        ctx.fillStyle = `rgba(226,232,240,${0.35 + 0.65 * (0.5 + 0.5 * Math.sin(app.time * s.spd + s.ph))})`;
+        ctx.beginPath(); ctx.arc(s.x * W, s.y * H * 1.4, s.r, 0, Math.PI * 2); ctx.fill();
+      });
+
+      const boomAt = isTsar ? 0.48 : (isBike ? 0.45 : 0.46);
+      const reasAt = isTsar ? 0.72 : (isBike ? 0.67 : 0.66);
+
+      if (t < boomAt) {
+        drawCosmicWhale(dt, isTsar && t > 0.28, 1);
+      } else {
+        if (!app.paraUltraWhaleExploded) {
+          app.paraUltraWhaleExploded = true; app.shake = 42; app.flash = 1.0;
+          app.ultraShards = Array.from({ length: 96 }, (_, i) => {
+            const a = (i / 96) * 6.28 + Math.random() * 0.2, spd = 130 + Math.random() * 460;
+            return { x: W * 0.5, y: H * 0.36, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd, r: 3 + Math.random() * 6, hue: (i * 19) % 360 };
+          });
+          for (let b = 0; b < 7; b++) app.paraBooms.push({ x: W * (0.28 + b * 0.073), y: H * (0.25 + (b % 3) * 0.07), r: 16, a: 1 });
+          if (isTsar) app.paraTsarClouds.push({ x: W * 0.5, y: H * 0.38, age: 0, sc: 1.45 });
+        }
+
+        if (t < reasAt + 0.14 && app.ultraShards.length) {
+          const reasP = Math.max(0, Math.min(1, (t - reasAt + 0.12) / 0.24));
+          ctx.save(); ctx.globalCompositeOperation = 'screen';
+          if (t < reasAt) {
+            const rayA = Math.max(0, 1 - (t - boomAt) / (reasAt - boomAt));
+            ctx.save(); ctx.translate(W * 0.5, H * 0.36); ctx.rotate(app.time * 0.75);
+            for (let r = 0; r < 16; r++) {
+              ctx.rotate((Math.PI * 2) / 16);
+              const rg = ctx.createLinearGradient(0, 0, Math.max(W, H) * 0.65, 0);
+              rg.addColorStop(0, `hsla(${(r * 24 + app.time * 95) % 360},100%,76%,${rayA * 0.6})`);
+              rg.addColorStop(1, 'rgba(0,0,0,0)');
+              ctx.fillStyle = rg; ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(Math.max(W, H) * 0.65, -24); ctx.lineTo(Math.max(W, H) * 0.65, 24); ctx.closePath(); ctx.fill();
+            }
+            ctx.restore();
+          }
+          app.ultraShards.forEach(sh => {
+            if (t < reasAt - 0.06) { sh.x += sh.vx * dt; sh.y += sh.vy * dt; sh.vx *= 0.97; sh.vy *= 0.97; }
+            else { sh.x += (W * 0.5 - sh.x) * dt * 6.5; sh.y += (H * 0.36 - sh.y) * dt * 6.5; }
+            ctx.fillStyle = `hsla(${sh.hue},100%,76%,${1 - reasP * 0.7})`;
+            ctx.beginPath(); ctx.arc(sh.x, sh.y, sh.r, 0, Math.PI * 2); ctx.fill();
+          });
+          ctx.restore();
+        }
+
+        if (t >= reasAt) {
+          ctx.save(); ctx.globalCompositeOperation = 'screen';
+          const aura = ctx.createRadialGradient(W * 0.5, H * 0.36, 20, W * 0.5, H * 0.36, 310);
+          aura.addColorStop(0, 'rgba(254,240,138,.52)'); aura.addColorStop(0.5, 'rgba(239,68,68,.38)'); aura.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = aura; ctx.beginPath(); ctx.arc(W * 0.5, H * 0.36, 310, 0, Math.PI * 2); ctx.fill();
+          if (Math.random() < 0.42) {
+            ctx.strokeStyle = '#fef08a'; ctx.lineWidth = 2.6;
+            let lx = W * 0.5 + (Math.random() - 0.5) * 280, ly = H * 0.14;
+            ctx.beginPath(); ctx.moveTo(lx, ly);
+            for (let s = 0; s < 5; s++) { lx += (Math.random() - 0.5) * 65; ly += 40; ctx.lineTo(lx, ly); }
+            ctx.stroke();
+          }
+          ctx.restore();
+          drawCosmicWhale(dt, true, isTsar ? 1.15 : 1.08);
+        }
+      }
+    } else {
+      drawMainScene(dt, false, 0);
+    }
+
+    // Lentokoneet & hävittäjät
+    app.paraPlanes.forEach(pl => {
+      pl.x += pl.vx * dt;
+      if (pl.vx > 0 && pl.x > W + 180) pl.x = -180;
+      if (pl.vx < 0 && pl.x < -180) pl.x = W + 180;
+      drawJet(pl.x, pl.y, pl.vx >= 0 ? 1 : -1, pl.sc, isMega || isUltra || isTsar ? '#f8fafc' : '#94a3b8', isMega || isUltra || isTsar);
+    });
+
+    // Laskuvarjohyppääjät
+    app.paraJumpers.forEach(jm => {
+      if (t < jm.dropAt) return;
+      jm.x += jm.vx * dt; jm.y += jm.vy * dt; jm.sway += dt * 3.4;
+      if (jm.y > H * 0.82) { jm.y = H * 0.82; jm.vy = -120 - Math.random() * 80; }
+      drawJumper(jm);
+      if (!jm.dropped && t > jm.dropAt + 0.55) {
+        jm.dropped = true;
+        const tx = (isUltra || isBike || isTsar) ? W * 0.5 + (Math.random() - 0.5) * 180 : W * (0.15 + Math.random() * 0.7);
+        const ty = (isUltra || isBike || isTsar) ? H * 0.36 + (Math.random() - 0.5) * 90 : H * (0.48 + Math.random() * 0.32);
+        app.paraBombs.push({ x: jm.x, y: jm.y + 14, tx, ty, p: 0 });
+      }
+    });
+
+    // 4. VAIHTOEHTO: POLKUPYÖRÄNORSUT (20 s)
+    if (isBike && t < 0.92) {
+      app.paraBikeRiders.forEach(r => {
+        drawBikeElephant(r, dt);
+        r.nextShot -= dt;
+        if (r.nextShot <= 0) {
+          r.nextShot = 1.2 + Math.random() * 0.9;
+          app.paraBooms.push({ x: W * 0.5 + (Math.random() - 0.5) * 320, y: H * 0.36 + (Math.random() - 0.5) * 140, r: 12, a: 1 });
+          app.shake = Math.max(app.shake, 16);
+        }
+      });
+    }
+
+    // 5. VAIHTOEHTO: JÄTTIAUTOT & TSAR BOMBA!
+    if (isTsar && t < 0.92) {
+      const roadY = H * 0.75;
+      const rg = ctx.createLinearGradient(0, roadY, 0, H);
+      rg.addColorStop(0, 'rgba(30,41,59,.85)'); rg.addColorStop(1, 'rgba(2,6,23,.95)');
+      ctx.fillStyle = rg; ctx.fillRect(0, roadY, W, H - roadY);
+      ctx.strokeStyle = 'rgba(250,204,21,.55)'; ctx.lineWidth = 3; ctx.setLineDash([28, 22]);
+      ctx.beginPath(); ctx.moveTo(0, roadY + (H - roadY) * 0.42); ctx.lineTo(W, roadY + (H - roadY) * 0.42); ctx.stroke();
+      ctx.setLineDash([]);
+
+      app.paraTsarCars.forEach(car => {
+        drawMonsterCarElephant(car, dt);
+        car.nextLaunch -= dt;
+        if (car.nextLaunch <= 0 && t < 0.82) {
+          car.nextLaunch = 0.95 + Math.random() * 0.75;
+          app.paraTsarBombs.push({ x: car.x, y: car.y - 36, tx: W * 0.5 + (Math.random() - 0.5) * 260, ty: H * (0.26 + Math.random() * 0.25), p: 0 });
+        }
+      });
+
+      for (let i = app.paraTsarBombs.length - 1; i >= 0; i--) {
+        const tb = app.paraTsarBombs[i]; tb.p += dt * 1.35;
+        const bx = tb.x + (tb.tx - tb.x) * tb.p;
+        const by = tb.y + (tb.ty - tb.y) * tb.p - Math.sin(tb.p * Math.PI) * 115;
+        const ang = Math.atan2(tb.ty - tb.y, tb.tx - tb.x) - Math.cos(tb.p * Math.PI) * 0.65;
+        drawTsarBomba(bx, by, ang, 1.18);
+        if (tb.p >= 1) {
+          app.paraBooms.push({ x: tb.tx, y: tb.ty, r: 16, a: 1 });
+          app.paraTsarClouds.push({ x: tb.tx, y: tb.ty, age: 0, sc: 0.85 + Math.random() * 0.4 });
+          app.shake = Math.max(app.shake, 26);
+          app.paraTsarBombs.splice(i, 1);
+        }
+      }
+
+      ctx.save(); ctx.globalCompositeOperation = 'screen';
+      for (let i = app.paraTsarClouds.length - 1; i >= 0; i--) {
+        const cl = app.paraTsarClouds[i]; cl.age += dt;
+        if (cl.age > 2.6) { app.paraTsarClouds.splice(i, 1); continue; }
+        const a = Math.max(0, 1 - cl.age / 2.6);
+        const r = (36 + cl.age * 78) * cl.sc;
+        const stemH = (55 + cl.age * 68) * cl.sc;
+        const sg = ctx.createLinearGradient(cl.x, cl.y + 20, cl.x, cl.y - stemH);
+        sg.addColorStop(0, `rgba(239,68,68,${a * 0.7})`); sg.addColorStop(1, `rgba(254,240,138,${a * 0.9})`);
+        ctx.fillStyle = sg; ctx.fillRect(cl.x - r * 0.22, cl.y - stemH, r * 0.44, stemH + 15);
+        const cg = ctx.createRadialGradient(cl.x, cl.y - stemH, 6, cl.x, cl.y - stemH, r * 1.15);
+        cg.addColorStop(0, `rgba(255,255,240,${a})`); cg.addColorStop(0.45, `rgba(251,146,60,${a * 0.85})`); cg.addColorStop(0.8, `rgba(220,38,38,${a * 0.55})`); cg.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = cg; ctx.beginPath(); ctx.ellipse(cl.x, cl.y - stemH, r * 1.15, r * 0.62, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = `rgba(254,249,195,${a * 0.75})`; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.ellipse(cl.x, cl.y - stemH * 0.45, r * 1.55, r * 0.28, 0, 0, Math.PI * 2); ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // Pudotetut pommit & räjähdykset
+    for (let i = app.paraBombs.length - 1; i >= 0; i--) {
+      const b = app.paraBombs[i]; b.p += dt * 1.5;
+      const bx = b.x + (b.tx - b.x) * b.p, by = b.y + (b.ty - b.y) * b.p;
+      ctx.fillStyle = '#fef08a'; ctx.beginPath(); ctx.arc(bx, by, 6, 0, Math.PI * 2); ctx.fill();
+      if (b.p >= 1) { app.paraBooms.push({ x: b.tx, y: b.ty, r: 12, a: 1 }); app.shake = Math.max(app.shake, 16); app.paraBombs.splice(i, 1); }
+    }
+
+    ctx.save(); ctx.globalCompositeOperation = 'screen';
+    for (let i = app.paraBooms.length - 1; i >= 0; i--) {
+      const bo = app.paraBooms[i]; bo.r += (isMega || isUltra || isBike || isTsar ? 340 : 240) * dt; bo.a -= 1.15 * dt;
+      if (bo.a <= 0) { app.paraBooms.splice(i, 1); continue; }
+      const g = ctx.createRadialGradient(bo.x, bo.y, 2, bo.x, bo.y, bo.r);
+      g.addColorStop(0, `rgba(255,252,230,${bo.a})`);
+      g.addColorStop(0.5, isTsar ? `rgba(250,204,21,${bo.a * 0.85})` : (isMega || isUltra || isBike ? `rgba(236,72,153,${bo.a * 0.8})` : `rgba(249,115,22,${bo.a * 0.75})`));
+      g.addColorStop(1, 'rgba(56,189,248,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(bo.x, bo.y, bo.r, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = `rgba(254,240,138,${bo.a * 0.8})`; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(bo.x, bo.y, bo.r * 1.08, 0, Math.PI * 2); ctx.stroke();
+    }
+    ctx.restore();
+
+    if (t > 0.82) {
+      const ft = (t - 0.82) / 0.18, fr = ft * Math.max(W, H) * 1.35;
+      const fg = ctx.createRadialGradient(W * 0.5, H * 0.5, 10, W * 0.5, H * 0.5, Math.max(20, fr));
+      fg.addColorStop(0, '#ffffff');
+      fg.addColorStop(0.45, isTsar ? '#f97316' : (isBike ? '#34d399' : (isUltra ? '#e879f9' : (isMega ? '#f59e0b' : '#38bdf8'))));
+      fg.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = fg; ctx.beginPath(); ctx.arc(W * 0.5, H * 0.5, Math.max(20, fr), 0, Math.PI * 2); ctx.fill();
+    }
+
+    if (app.flash > 0) { app.flash = Math.max(0, app.flash - dt * 1.35); ctx.fillStyle = `rgba(255,252,240,${app.flash})`; ctx.fillRect(0, 0, W, H); }
+    if (t >= 1) enterWhale(true, app.state);
+  }
+
+  /* =====================================================================
+     10. KOSMINEN VALAS & KORJAUSANIMAATIO
+     ===================================================================== */
+  function enterWhale(reset = true, fromMode = 'nuke') {
+    app.state = 'WHALE'; app.stateTime = 0; app.whaleHearts = []; app.whaleCoins = []; app.whaleLaser = null;
+    setBanner(false); showEl($('labOverlay'), false); showEl($('bunkerOverlay'), false); showEl($('parachuteMenuOverlay'), false);
+    setTopActionsVisible(false);
+
+    if (reset) {
+      const speeches = {
+        PARACHUTE_TSAR: ['angry', '"RAAGHHH!! Jättiautonorsut toivat TSAR BOMBA -pommeja ja räjäyttivät minut palasiksi!! Olen raivoissani — maksa 999 €, jotta korjataan tämä maailma!"'],
+        PARACHUTE_BIKE: ['angry', '"MITÄ?! 20 sekuntia neonpolkupyöränorsuja ja minut räjäytettiin tähtipölyksi!! Onneksi kettu oli bunkkerissa — korjataanpa sivu!"'],
+        PARACHUTE_ULTRA: ['angry', '"USKOMATONTA!! Hylkeet ja norsut räjäyttivät minutkin palasiksi! Kokoontuminen sattui — nyt maksat korjauksen!"'],
+        PARACHUTE_MEGA: ['calm', '"Vau, mitkä yliäänihävittäjät ja sateenkaarisupernova! Onneksi kettu oli bunkkerissa. Korjataanko Eläinten Maa takaisin?"'],
+        PARACHUTE_NORM: ['calm', '"Laskuvarjohylkeet ja norsut tekivät melkoisen sotkun! Maksa 999 € loputtomasta lompakostasi, niin korjaan kaiken."'],
+        elephant_dlc: ['angry', '"KAIKKI 14 ALUETTA JA KULTAINEN KEISARINORSU?! Koko kartta katosi! Korjataan se heti!"'],
+        elephant_portal: ['calm', '"Pöllökallion Norsuportaali?! Sekoilevat ydinnorsut räjäyttivät Karhuvuoret. Korjataanko maailma?"'],
+        sso: ['calm', '"SSO-10 avaruuslaserkone! Mahtava säde, mutta koko planeetta meni rikki. Korjataanko se?"'],
+        blackhole: ['calm', '"Karhujen Musta Aukko -ase imaisi koko laboratorion! Korjataanko Eläinten Maa takaisin?"'],
+        nuke: ['calm', '"Hui! Kuun ydinase räjäytti koko metsän — onneksi kettu ehti maanalaiseen bunkkeriin! Korjataanko maailma?"']
+      };
+      const [mood, txt] = speeches[fromMode] || speeches.nuke;
+      app.whaleMood = mood;
+      $('whaleSpeech').textContent = txt;
+    }
+    showEl($('whaleOverlay'), true);
+    snd.playWhale(app.whaleMood !== 'angry');
+  }
+
+  function drawWhaleScene(dt) {
+    const bgW = ctx.createRadialGradient(W * 0.5, H * 0.36, 30, W * 0.5, H * 0.5, Math.max(W, H) * 0.85);
+    bgW.addColorStop(0, app.whaleMood === 'angry' ? '#2c0c18' : '#0f172a');
+    bgW.addColorStop(0.6, '#050816'); bgW.addColorStop(1, '#010208');
+    ctx.fillStyle = bgW; ctx.fillRect(0, 0, W, H);
+    app.stars.forEach(s => {
+      ctx.fillStyle = `rgba(226,232,240,${0.35 + 0.65 * (0.5 + 0.5 * Math.sin(app.time * s.spd + s.ph))})`;
+      ctx.beginPath(); ctx.arc(s.x * W, s.y * H * 1.4, s.r, 0, Math.PI * 2); ctx.fill();
+    });
+
+    drawCosmicWhale(dt, app.whaleMood === 'angry', 1.05);
+
+    for (let i = app.whaleHearts.length - 1; i >= 0; i--) {
+      const h = app.whaleHearts[i]; h.x += h.vx * dt; h.y += h.vy * dt; h.life -= dt * 0.5;
+      if (h.life <= 0) { app.whaleHearts.splice(i, 1); continue; }
+      ctx.save(); ctx.globalAlpha = h.life; ctx.font = '26px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(h.em, h.x, h.y); ctx.restore();
+    }
+    for (let i = app.whaleCoins.length - 1; i >= 0; i--) {
+      const c = app.whaleCoins[i]; c.x += c.vx * dt; c.y += c.vy * dt; c.vy += 260 * dt;
+      ctx.font = '24px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('🪙', c.x, c.y);
+      if (c.y > H + 40) app.whaleCoins.splice(i, 1);
+    }
+    if (app.whaleLaser) {
+      app.whaleLaser.t += dt;
+      ctx.save(); ctx.globalCompositeOperation = 'screen';
+      ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 14;
+      ctx.beginPath(); ctx.moveTo(W * 0.5, H * 0.85); ctx.lineTo(W * 0.5, H * 0.36); ctx.stroke();
+      ctx.restore();
+      if (app.whaleLaser.t > 0.6) app.whaleLaser = null;
+    }
+  }
+
+  function startRepair(variant = 'standard') {
+    app.state = 'REPAIRING'; app.stateTime = 0; app.repairVariant = variant;
+    showEl($('whaleOverlay'), false);
+    app.repairParts = Array.from({ length: 90 }, (_, i) => ({
+      ang: (i / 90) * 6.28, dist: 60 + Math.random() * Math.max(W, H) * 0.55, hue: variant === 'gold' ? 45 : (i * 12) % 360
+    }));
+    snd.playWhale(true);
+    setBanner(true, variant === 'gold' ? '✨ KULTAINEN SUPERKORJAUS!' : '🌈 ELÄINTEN MAA PALAUTETAAN!', 'Kettu nousee hissillä takaisin kuutamometsään!');
+  }
+
+  function drawRepair(dt) {
+    const t = Math.min(1, app.stateTime / 3.0);
+    drawMainScene(dt, false, 0);
+    ctx.save(); ctx.globalCompositeOperation = 'screen';
+    const cx = W * 0.5, cy = H * 0.5;
+    app.repairParts.forEach(p => {
+      p.ang += dt * 3.5;
+      const d = p.dist * (1 - t);
+      ctx.fillStyle = `hsla(${p.hue},100%,72%,${1 - t * 0.5})`;
+      ctx.beginPath(); ctx.arc(cx + Math.cos(p.ang) * d, cy + Math.sin(p.ang) * d, 5, 0, Math.PI * 2); ctx.fill();
+    });
+    const fg = ctx.createRadialGradient(cx, cy, 10, cx, cy, Math.max(W, H) * t);
+    fg.addColorStop(0, `rgba(255,255,255,${Math.sin(t * Math.PI) * 0.85})`);
+    fg.addColorStop(1, 'rgba(52,211,153,0)');
+    ctx.fillStyle = fg; ctx.fillRect(0, 0, W, H);
+    ctx.restore();
+
+    if (t >= 1) {
+      app.state = 'MAIN'; app.stateTime = 0;
+      setBanner(false); showEl($('mainUI'), true); setTopActionsVisible(true);
+    }
+  }
+
+  /* =====================================================================
+     11. AITO ZIP-LATAUS (Ilman ulkoisia kirjastoja!)
+     ===================================================================== */
+  function createZipBlob(files) {
+    const crcTable = new Uint32Array(256);
+    for (let i = 0; i < 256; i++) {
+      let c = i;
+      for (let k = 0; k < 8; k++) c = (c & 1) ? (0xedb88320 ^ (c >>> 1)) : (c >>> 1);
+      crcTable[i] = c >>> 0;
+    }
+    const crc32 = buf => {
+      let c = 0xffffffff;
+      for (let i = 0; i < buf.length; i++) c = crcTable[(c ^ buf[i]) & 0xff] ^ (c >>> 8);
+      return (c ^ 0xffffffff) >>> 0;
+    };
+    const enc = new TextEncoder();
+    const locals = [], centrals = [];
+    let offset = 0;
+
+    files.forEach(f => {
+      const nameB = enc.encode(f.name);
+      const dataB = enc.encode(f.content);
+      const crc = crc32(dataB);
+
+      const lh = new Uint8Array(30 + nameB.length);
+      const lv = new DataView(lh.buffer);
+      lv.setUint32(0, 0x04034b50, true); lv.setUint16(4, 20, true); lv.setUint16(8, 0, true);
+      lv.setUint32(14, crc, true); lv.setUint32(18, dataB.length, true); lv.setUint32(22, dataB.length, true);
+      lv.setUint16(26, nameB.length, true); lh.set(nameB, 30);
+      locals.push(lh, dataB);
+
+      const ch = new Uint8Array(46 + nameB.length);
+      const cv = new DataView(ch.buffer);
+      cv.setUint32(0, 0x02014b50, true); cv.setUint16(4, 20, true); cv.setUint16(6, 20, true);
+      cv.setUint32(16, crc, true); cv.setUint32(20, dataB.length, true); cv.setUint32(24, dataB.length, true);
+      cv.setUint16(28, nameB.length, true); cv.setUint32(42, offset, true); ch.set(nameB, 46);
+      centrals.push(ch);
+      offset += lh.length + dataB.length;
+    });
+
+    const cdSize = centrals.reduce((s, a) => s + a.length, 0);
+    const eocd = new Uint8Array(22);
+    const ev = new DataView(eocd.buffer);
+    ev.setUint32(0, 0x06054b50, true);
+    ev.setUint16(8, files.length, true); ev.setUint16(10, files.length, true);
+    ev.setUint32(12, cdSize, true); ev.setUint32(16, offset, true);
+    return new Blob([...locals, ...centrals, eocd], { type: 'application/zip' });
+  }
+
+  function downloadWebsiteZip() {
+    try {
+      const htmlSrc = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+      const readme = 'ELÄINTEN MAA — Verkkosivupaketti\n\nAvaa index.html selaimella (Chrome, Edge, Firefox tai Safari).\nKaikki 5 tuhotapaa, Ketun Bunkkeri, Lisäosa ja Hylkeet & Norsut -tilat toimivat suoraan!';
+      const blob = createZipBlob([
+        { name: 'index.html', content: htmlSrc },
+        { name: 'LUE_MINUT.txt', content: readme }
+      ]);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'elainten_maa_verkkosivu.zip';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      showToast('📦 ZIP-paketti (elainten_maa_verkkosivu.zip) ladattu!');
+    } catch (err) {
+      showToast('⚠️ ZIP-lataus epäonnistui selaimessa.');
+    }
+  }
+
+  /* =====================================================================
+     12. TAPAHTUMANKÄSITTELIJÄT
+     ===================================================================== */
+  $('soundBtn').addEventListener('click', () => {
+    const on = snd.toggle();
+    $('soundIcon').textContent = on ? '🔊' : '🔇';
+    $('soundText').textContent = on ? 'Äänet päällä' : 'Äänet pois';
+  });
+  $('downloadZipBtn').addEventListener('click', downloadWebsiteZip);
+  $('ssoVideoInput').addEventListener('change', e => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    if (app.ssoVideoUrl) URL.revokeObjectURL(app.ssoVideoUrl);
+    app.ssoVideoUrl = URL.createObjectURL(file);
+    showToast('🎬 Oma SSO-10 video ladattu! Paina SSO-10 käynnistääksesi.');
+  });
+  $('skipVideoBtn').addEventListener('click', () => {
+    const v = $('ssoVideoEl'); v.pause();
+    showEl($('ssoVideoWrap'), false);
+    enterWhale(true, 'sso');
+  });
+
+  // Yläpalkin & kartan napit
+  $('openMapBtn').addEventListener('click', openMapNow);
+  $('closeMapBtn').addEventListener('click', () => { app.state = 'MAIN'; showEl($('mapOverlay'), false); showEl($('mainUI'), true); setTopActionsVisible(true); });
+  $('closeLocCardBtn').addEventListener('click', () => selectLocation(null));
+  $('zoomInBtn').addEventListener('click', () => { app.mapCam.zoom = Math.min(1.8, app.mapCam.zoom * 1.2); });
+  $('zoomOutBtn').addEventListener('click', () => { app.mapCam.zoom = Math.max(0.45, app.mapCam.zoom / 1.2); });
+  $('resetMapBtn').addEventListener('click', () => { app.mapCam.x = MAP_W * 0.5; app.mapCam.y = MAP_H * 0.5; app.mapCam.zoom = 0.72; });
+
+  $('topBunkerBtn').addEventListener('click', openBunkerVisit);
+  $('openBunkerFromMapBtn').addEventListener('click', openBunkerVisit);
+  $('bunkerBackBtn').addEventListener('click', () => { app.state = 'MAIN'; showEl($('bunkerOverlay'), false); showEl($('mainUI'), true); setTopActionsVisible(true); });
+  $('bunkerOpenMapBtn').addEventListener('click', openMapNow);
+  $('bunkerFireBtn').addEventListener('click', () => {
+    app.bunkerFireBoost = 1.6;
+    $('bunkerStatusText').textContent = '🔥 Lisäsit koivuhalkoja takkaan — bunkkeri hohtaa lämpöä!';
+    snd.tone('triangle', 180, 320, 0.35, 0.14, 0);
+    for (let i = 0; i < 8; i++) app.bunkerHearts.push({ x: W * 0.35 + (Math.random() - 0.5) * 60, y: H * 0.52, vx: (Math.random() - 0.5) * 35, vy: -50 - Math.random() * 45, life: 1.2, sz: 18, em: '🔥' });
+  });
+  $('bunkerCocoaBtn').addEventListener('click', () => {
+    $('bunkerStatusText').textContent = '☕ Kettu nauttii höyryävästä kaakaosta vaahtokarkkien kera!';
+    snd.tone('sine', 520, 780, 0.35, 0.12, 0);
+    for (let i = 0; i < 10; i++) app.bunkerHearts.push({ x: W * 0.5 + (Math.random() - 0.5) * 140, y: H * 0.48, vx: (Math.random() - 0.5) * 40, vy: -45 - Math.random() * 55, life: 1.3, sz: 18, em: i % 2 === 0 ? '💖' : '☕' });
+  });
+  $('bunkerShieldBtn').addEventListener('click', () => {
+    app.bunkerShieldTest = 1.6;
+    $('bunkerStatusText').textContent = '🛡️ Smaragdikilpi 100 %! Kestää jopa Tsar Bomba -iskun!';
+    snd.tone('sine', 340, 880, 0.55, 0.15, 0);
+  });
+
+  $('topLabBtn').addEventListener('click', openLabNow);
+  $('openLabFromMapBtn').addEventListener('click', openLabNow);
+  $('labBackBtn').addEventListener('click', () => { app.state = 'MAIN'; showEl($('labOverlay'), false); showEl($('mainUI'), true); setTopActionsVisible(true); });
+  $('fireBlackHoleBtn').addEventListener('click', () => beginShelterSequence('blackhole'));
+
+  $('topNukeBtn').addEventListener('click', () => { if (['MAIN', 'MAP', 'LAB', 'BUNKER_VISIT'].includes(app.state)) beginShelterSequence('nuke'); });
+  $('topSsoBtn').addEventListener('click', () => { if (['MAIN', 'MAP', 'LAB', 'BUNKER_VISIT'].includes(app.state)) beginShelterSequence('sso'); });
+  $('topPortalBtn').addEventListener('click', () => { if (['MAIN', 'MAP', 'LAB', 'BUNKER_VISIT'].includes(app.state)) beginShelterSequence('elephant_portal'); });
+  $('openPortalFromMapBtn').addEventListener('click', () => beginShelterSequence('elephant_portal'));
+  $('topDlcBtn').addEventListener('click', () => { if (['MAIN', 'MAP', 'LAB', 'BUNKER_VISIT'].includes(app.state)) beginShelterSequence('elephant_dlc'); });
+  $('openDlcFromMapBtn').addEventListener('click', () => beginShelterSequence('elephant_dlc'));
+
+  $('topParachuteBtn').addEventListener('click', () => { if (['MAIN', 'MAP', 'LAB', 'BUNKER_VISIT'].includes(app.state)) showEl($('parachuteMenuOverlay'), true); });
+  $('openParachuteFromMapBtn').addEventListener('click', () => showEl($('parachuteMenuOverlay'), true));
+  $('closeParachuteMenuBtn').addEventListener('click', () => showEl($('parachuteMenuOverlay'), false));
+  $('startParachuteNormBtn').addEventListener('click', () => beginShelterSequence('parachute_norm'));
+  $('startParachuteMegaBtn').addEventListener('click', () => beginShelterSequence('parachute_mega'));
+  $('startParachuteUltraBtn').addEventListener('click', () => beginShelterSequence('parachute_ultra'));
+  $('startParachuteBikeBtn').addEventListener('click', () => beginShelterSequence('parachute_bike'));
+  $('startParachuteTsarBtn').addEventListener('click', () => beginShelterSequence('parachute_tsar'));
+
+  // Kosmisen Valaan napit
+  $('whalePayBtn').addEventListener('click', () => startRepair('standard'));
+  $('whaleMegaPayBtn').addEventListener('click', () => {
+    for (let i = 0; i < 36; i++) app.whaleCoins.push({ x: W * 0.5 + (Math.random() - 0.5) * 300, y: H * 0.1, vx: (Math.random() - 0.5) * 180, vy: -80 - Math.random() * 140 });
+    $('whaleSpeech').textContent = '"OHHOH!! 999 999 € kultasade!! Saat kultaisen superkorjauksen!"';
+    setTimeout(() => startRepair('gold'), 1100);
+  });
+  $('whaleHugBtn').addEventListener('click', () => {
+    app.whaleMood = 'calm';
+    $('whaleSpeech').textContent = '"Aww, kiitos halauksesta! Anteeksi annettu — korjaan Eläinten Maan rakkaudella!"';
+    for (let i = 0; i < 18; i++) app.whaleHearts.push({ x: W * 0.5 + (Math.random() - 0.5) * 240, y: H * 0.42, vx: (Math.random() - 0.5) * 60, vy: -60 - Math.random() * 60, life: 1.4, em: '💖' });
+    setTimeout(() => startRepair('standard'), 1300);
+  });
+  $('whaleLaserBtn').addEventListener('click', () => {
+    app.whaleMood = 'angry'; app.whaleLaser = { t: 0 }; app.shake = 22;
+    snd.tone('sawtooth', 520, 90, 0.5, 0.25, 0);
+    $('whaleSpeech').textContent = '"AUTS!! Älä ammu minua laserilla! Olen kuolematon Kosminen Valas — nyt maksat 999 € tai halaat!"';
+  });
+
+  // Hiiri & kosketus pääkanvaksella (Kuu & Labra-ase)
+  canvas.addEventListener('pointermove', e => {
+    app.mouseX = e.clientX; app.mouseY = e.clientY;
+    if (app.state === 'MAIN') {
+      const d = Math.hypot(e.clientX - app.moon.x, e.clientY - app.moon.y);
+      app.hoverMoon = d < app.moon.hitR;
+      canvas.style.cursor = app.hoverMoon ? 'pointer' : 'default';
+      const tt = $('moonTooltip');
+      tt.style.left = Math.min(W - 210, Math.max(12, e.clientX - 90)) + 'px';
+      tt.style.top = Math.max(70, e.clientY + 24) + 'px';
+      tt.style.opacity = app.hoverMoon ? '1' : '0';
+    } else if (app.state === 'LAB') {
+      app.hoverLabGun = Math.hypot(e.clientX - app.labGun.x, e.clientY - app.labGun.y) < app.labGun.hitR;
+      canvas.style.cursor = app.hoverLabGun ? 'pointer' : 'default';
+    } else {
+      app.hoverMoon = false; app.hoverLabGun = false; canvas.style.cursor = 'default';
+      $('moonTooltip').style.opacity = '0';
+    }
+  });
+  canvas.addEventListener('pointerdown', e => {
+    if (app.state === 'MAIN' && Math.hypot(e.clientX - app.moon.x, e.clientY - app.moon.y) < app.moon.hitR) {
+      beginShelterSequence('nuke');
+    } else if (app.state === 'LAB' && Math.hypot(e.clientX - app.labGun.x, e.clientY - app.labGun.y) < app.labGun.hitR) {
+      beginShelterSequence('blackhole');
+    }
+  });
+
+  // Kartan raahaus, zoomaus ja kohteiden klikkaus
+  let mapDragged = false;
+  mapCanvas.addEventListener('pointerdown', e => {
+    app.mapCam.drag = true; mapDragged = false; app.mapCam.lx = e.clientX; app.mapCam.ly = e.clientY;
+  });
+  window.addEventListener('pointermove', e => {
+    if (!app.mapCam.drag) return;
+    const dx = e.clientX - app.mapCam.lx, dy = e.clientY - app.mapCam.ly;
+    if (Math.hypot(dx, dy) > 4) mapDragged = true;
+    app.mapCam.x -= dx / app.mapCam.zoom; app.mapCam.y -= dy / app.mapCam.zoom;
+    app.mapCam.lx = e.clientX; app.mapCam.ly = e.clientY;
+  });
+  window.addEventListener('pointerup', e => {
+    if (!app.mapCam.drag) return;
+    app.mapCam.drag = false;
+    if (!mapDragged && app.state === 'MAP') {
+      const rect = mapCanvas.getBoundingClientRect();
+      const mx = (e.clientX - rect.left - rect.width / 2) / app.mapCam.zoom + app.mapCam.x;
+      const my = (e.clientY - rect.top - rect.height / 2) / app.mapCam.zoom + app.mapCam.y;
+      const hit = LOCATIONS.find(l => Math.hypot(l.x - mx, l.y - my) < 38);
+      if (hit) selectLocation(hit);
+    }
+  });
+  mapCanvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    app.mapCam.zoom = Math.max(0.45, Math.min(1.85, app.mapCam.zoom * (e.deltaY < 0 ? 1.12 : 0.9)));
+  }, { passive: false });
+
+  /* =====================================================================
+     13. PÄÄSILMUKKA & KÄYNNISTYS
+     ===================================================================== */
+  let booted = false;
+  let lastFrame = performance.now();
+
+  function handleResize() {
+    W = window.innerWidth || 1280;
+    H = window.innerHeight || 720;
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.max(1, Math.floor(W * dpr));
+    canvas.height = Math.max(1, Math.floor(H * dpr));
+    updateGeometry();
+    if (mapCanvas) {
+      const mw = mapCanvas.clientWidth || W, mh = mapCanvas.clientHeight || H;
+      mapCanvas.width = Math.max(1, Math.floor(mw * dpr));
+      mapCanvas.height = Math.max(1, Math.floor(mh * dpr));
+    }
+  }
+
+  function tick(now) {
+    const dt = Math.min(0.05, Math.max(0.001, (now - lastFrame) / 1000));
+    lastFrame = now;
+    app.time += dt;
+    app.stateTime += dt;
+
+    if ((window.innerWidth || W) !== W || (window.innerHeight || H) !== H || !canvas.width || !canvas.height) {
+      handleResize();
+    }
+    if (app.shake > 0.05) app.shake = Math.max(0, app.shake - dt * 16);
+
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, W, H);
+    if (app.shake > 0.2) {
+      ctx.translate((Math.random() - 0.5) * app.shake, (Math.random() - 0.5) * app.shake);
+    }
+
+    try {
+      if (app.state === 'MAIN') drawMainScene(dt, true, 0);
+      else if (app.state === 'MAP') { drawMainScene(dt, false, 0); drawMapScene(); }
+      else if (app.state === 'LAB') drawLabScene(dt);
+      else if (app.state === 'BUNKER_VISIT') drawBunkerVisit(dt);
+      else if (app.state === 'FOX_SHELTER') drawFoxShelter(dt);
+      else if (app.state === 'LAUNCHING' || app.state === 'EXPLODING') drawNukeSequence(dt);
+      else if (app.state === 'BLACKHOLE_SUCK') drawBlackHoleSequence(dt);
+      else if (app.state === 'SSO_SEQUENCE') drawSSOSequence(dt);
+      else if (app.state === 'ELEPHANT_PORTAL') drawElephantPortal(dt);
+      else if (app.state === 'ELEPHANT_DLC') drawElephantDLC(dt);
+      else if (['PARACHUTE_NORM', 'PARACHUTE_MEGA', 'PARACHUTE_ULTRA', 'PARACHUTE_BIKE', 'PARACHUTE_TSAR'].includes(app.state)) drawParachuteModes(dt);
+      else if (app.state === 'WHALE') drawWhaleScene(dt);
+      else if (app.state === 'REPAIRING') drawRepair(dt);
+      else drawMainScene(dt, true, 0);
+    } catch (err) {
+      console.error('Render error:', err);
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  function boot() {
+    if (booted) { handleResize(); return; }
+    booted = true;
+    handleResize();
+    initAmbient();
+    createMoonAsset();
+    createFoxAssets();
+    updateBadges();
+    window.addEventListener('resize', handleResize);
+    lastFrame = performance.now();
+    requestAnimationFrame(tick);
+  }
+
+  boot();
+  window.addEventListener('load', boot);
+})();
+</script>
+
+</body></html>
